@@ -9,8 +9,8 @@ public class Student extends User{
     private double maxBudget;
     private List<String> wishlistIds;
 
-    public Student(String id, String name, String email, String password, String collegeName, String genderPreference, double maxBudget){
-        super(id,name, email, password, "STUDENT");
+    public Student(String id, String name, String username, String email, String phoneNumber, String password, String collegeName, String genderPreference, double maxBudget){
+        super(id,name,username,email,phoneNumber,password, "STUDENT");
         this.collegeName = collegeName;
         this.genderPreference = genderPreference;
         this.maxBudget = maxBudget;
@@ -21,6 +21,9 @@ public class Student extends User{
 
     public String getGenderPreference() {return genderPreference; }
     public void setGenderPreference(String genderPreference) {this.genderPreference = genderPreference; }
+    
+    public double getMaxBudget() {return maxBudget;}
+    public void setMaxBudget(double maxBudget) {this.maxBudget = maxBudget;}
 
     public List<String> getWishlistIds() {return wishlistIds; }
     public void addWishlistId(String accommodationId) {

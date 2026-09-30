@@ -1,4 +1,3 @@
-
 package haven.db;
 
 import com.mongodb.client.MongoCollection;
@@ -33,27 +32,58 @@ public class UserDAO {
     // Save a user in MongoDB
     public boolean insertUser(User user) {
 
-    if (emailExists(user.getEmail())) {
-        System.out.println("Email already exists!");
-        return false;
+        if (emailExists(user.getEmail())) {
+            System.out.println("Email already exists!");
+            return false;
+        }
+
+        if (usernameExists(user.getUsername())) {
+            System.out.println("Username already exists!");
+            return false;
+        }
+
+        // Hash the password before storing it
+        String hashedPassword =
+                PasswordUtil.hashPassword(user.getPassword());
+
+        Document doc = new Document("id", user.getId())
+                .append("name", user.getName())
+                .append("username", user.getUsername())
+                .append("email", user.getEmail())
+                .append("phoneNumber", user.getPhoneNumber())
+                .append("password", hashedPassword)
+                .append("role", user.getRole());
+
+        collection.insertOne(doc);
+
+        System.out.println("User registered successfully!");
+        return true;
     }
+    // Verify login credentials
+    public boolean login(String username, String password) {
 
-    if (usernameExists(user.getUsername())) {
-        System.out.println("Username already exists!");
-        return false;
+        Document user = collection.find(
+            Filters.eq("username", username)
+        ).first();
+
+        if (user == null) {
+            System.out.println("User not found!");
+            return false;
+       }
+
+        String storedPassword = user.getString("password");
+
+        boolean valid = PasswordUtil.verifyPassword(
+                password,
+                storedPassword
+        );
+
+        if (valid) {
+            System.out.println("Login successful!");
+            return true;
+        } else {
+            System.out.println("Incorrect password!");
+            return false;
+        }
     }
-
-    Document doc = new Document("id", user.getId())
-            .append("name", user.getName())
-            .append("username", user.getUsername())
-            .append("email", user.getEmail())
-            .append("phoneNumber", user.getPhoneNumber())
-            .append("password", user.getPassword())
-            .append("role", user.getRole());
-
-    collection.insertOne(doc);
-
-    System.out.println("User registered successfully!");
-    return true;
-}
-}
+ }

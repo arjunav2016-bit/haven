@@ -9,7 +9,7 @@ public class SeedData {
         HostelDAO dao = new HostelDAO();
 
         // Clear existing data so duplicates aren't created
-        MongoDBConnection.getInstance().getDatabase().getCollection("hostels").drop();
+        //MongoDBConnection.getInstance().getDatabase().getCollection("hostels").drop();
 
         // Sample stays around SCTCE Pappanamcode
         dao.insertAccommodation(new Hostel(
@@ -43,6 +43,12 @@ public class SeedData {
         ));
 
         System.out.println("Database successfully seeded with 5 accommodations for SCTCE!");
+        long count = MongoDBConnection.getInstance()
+        .getDatabase()
+        .getCollection("hostels")
+        .countDocuments();
+
+        System.out.println("Total accommodations: " + count);
         MongoDBConnection.getInstance().close();
     }
 }

@@ -180,7 +180,7 @@ public class CompareDialog extends JDialog {
         column.add(amenitiesHeader);
         column.add(Box.createVerticalStrut(4));
 
-        String[] standardAmenities = {"WiFi", "Food / Mess", "AC", "Attached Washroom", "CCTV Security", "Power Backup"};
+        String[] standardAmenities = {"WiFi", "Food / Mess", "Attached Washroom", "CCTV Security", "Power Backup"};
         for (String am : standardAmenities) {
             boolean hasIt = acc.getAmenities().stream().anyMatch(a -> a.toLowerCase().contains(am.toLowerCase().split("/")[0].trim().toLowerCase()));
             String icon = hasIt ? "✓ " : "- ";

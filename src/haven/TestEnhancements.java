@@ -37,9 +37,9 @@ public class TestEnhancements {
 
         assert hostel.hasAmenity("WiFi") : "WiFi check failed";
         assert hostel.hasAmenity("food / mess") : "Case-insensitive amenity check failed";
-        assert !hostel.hasAmenity("AC") : "Should not have AC";
+        assert !hostel.hasAmenity("Swimming Pool") : "Should not have Swimming Pool";
         assert hostel.hasAllAmenities(List.of("WiFi", "Food / Mess")) : "hasAllAmenities failed";
-        assert !hostel.hasAllAmenities(List.of("WiFi", "AC")) : "hasAllAmenities negative check failed";
+        assert !hostel.hasAllAmenities(List.of("WiFi", "Swimming Pool")) : "hasAllAmenities negative check failed";
         System.out.println("PASSED! Amenities: " + hostel.getAmenities());
 
         // 3. Verify Receipt Generator Output
@@ -64,7 +64,7 @@ public class TestEnhancements {
         PG pg = new PG("BPG01", "owner", "Atham PG", "SCTCE", 4500, 0.9, "Boys", 12, 8.4, 76.9, true, 500, "Pappanamcode", "8848726001");
         pg.addAmenity("WiFi");
         pg.addAmenity("Attached Washroom");
-        pg.addAmenity("AC");
+        pg.addAmenity("Power Backup");
 
         double hostelCost = hostel.calculateTotalMonthlyCost(1);
         double pgCost = pg.calculateTotalMonthlyCost(1);
@@ -387,7 +387,7 @@ public class TestEnhancements {
                 .address("Sreekaryam, Trivandrum")
                 .contactPhone("9447998877")
                 .addAmenity("WiFi")
-                .addAmenity("AC")
+                .addAmenity("Power Backup")
                 .build();
         assert "PGB-TEST".equals(builtPG.getId()) : "PGBuilder ID mismatch";
         assert builtPG.isFoodIncluded() : "PGBuilder foodIncluded flag not set";

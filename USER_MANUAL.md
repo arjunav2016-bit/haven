@@ -36,7 +36,7 @@ Use the **2-Tier Advanced Filter Bar** at the top of the **Discover Stays** tab:
 - **Tier 2 Range & Amenity Filters**:
   - Enter **Min ₹**, **Max ₹**, and **Max km** bounds, or click a quick budget chip (`< ₹6,000`, `< ₹8,000`, `< ₹10,000`).
   - Select **Min Rating** (`3★+`, `4★+`, `4.5★+`) and toggle **Vacancies Only** or **Saved Only**.
-  - Check any required amenities (`WiFi`, `Food / Mess`, `AC`, `Laundry`, `Power Backup`, `CCTV Security`, `Parking`, `Attached Bath`).
+  - Check any required amenities (`WiFi`, `Food / Mess`, `Laundry`, `Power Backup`, `CCTV Security`, `Parking`, `Attached Bath`).
 
 ### 2.2 Viewing Property Photo Galleries
 - Every listing card displays a property thumbnail with a photo count badge (`2 photos`).

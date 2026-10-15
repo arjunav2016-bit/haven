@@ -275,7 +275,6 @@ public class FilePersistenceManager {
                     } else {
                         acc.addAmenity("WiFi");
                         if (acc instanceof Hostel || ((PG) acc).isFoodIncluded()) acc.addAmenity("Food / Mess");
-                        if (acc instanceof PG && acc.getName().toLowerCase().contains("atham")) acc.addAmenity("AC");
                         acc.addAmenity("Attached Washroom");
                         acc.addAmenity("Power Backup");
                         if (acc instanceof Hostel) acc.addAmenity("CCTV Security");

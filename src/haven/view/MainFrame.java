@@ -59,7 +59,6 @@ public class MainFrame extends JFrame implements PanelMediator {
 
     private final JCheckBox wifiFilterCheck;
     private final JCheckBox foodFilterCheck;
-    private final JCheckBox acFilterCheck;
     private final JCheckBox bathFilterCheck;
     private final JCheckBox cctvFilterCheck;
     private final JCheckBox powerFilterCheck;
@@ -273,16 +272,6 @@ public class MainFrame extends JFrame implements PanelMediator {
         rentField.setToolTipText("Maximum Monthly Rent (₹)");
         primaryRow.add(rentField);
 
-        JLabel sortLbl = new JLabel("Sort:");
-        sortLbl.setFont(HavenTheme.FONT_CAPTION_BOLD);
-        sortLbl.setForeground(HavenTheme.TEXT_BODY);
-        primaryRow.add(sortLbl);
-
-        sortBox = new JComboBox<>(new String[]{"Default (Featured First)", "Rent: Low to High", "Distance: Nearest", "Vacancies: High to Low"});
-        sortBox.setFont(HavenTheme.FONT_BODY);
-        sortBox.setPreferredSize(new Dimension(165, 30));
-        primaryRow.add(sortBox);
-
         resultsCountLabel = HavenTheme.createBadge(
                 "Showing all stays",
                 HavenTheme.PRIMARY,
@@ -293,9 +282,27 @@ public class MainFrame extends JFrame implements PanelMediator {
 
         filterPanel.add(primaryRow);
 
-        // Tier 2: Distance Filter, Min Rating Filter, Vacancies Toggle, Amenities Toggles, and Reset
+        // Tier 2: Sort By, Distance Filter, Min Rating Filter, Vacancies Toggle, Amenities Toggles, and Reset
         JPanel tier2Row = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 3));
         tier2Row.setOpaque(false);
+
+        JLabel sortLbl = new JLabel("Sort By:");
+        sortLbl.setFont(HavenTheme.FONT_CAPTION_BOLD);
+        sortLbl.setForeground(HavenTheme.TEXT_PRIMARY);
+        tier2Row.add(sortLbl);
+
+        sortBox = new JComboBox<>(new String[]{
+                "Default (Featured First)",
+                "Rent: Low to High",
+                "Rent: High to Low",
+                "Distance: Nearest",
+                "Vacancies: High to Low"
+        });
+        sortBox.setFont(HavenTheme.FONT_BODY);
+        sortBox.setPreferredSize(new Dimension(175, 28));
+        tier2Row.add(sortBox);
+
+        tier2Row.add(Box.createHorizontalStrut(6));
 
         JLabel distLbl = new JLabel("Distance:");
         distLbl.setFont(HavenTheme.FONT_CAPTION_BOLD);
@@ -341,12 +348,6 @@ public class MainFrame extends JFrame implements PanelMediator {
         foodFilterCheck.setForeground(HavenTheme.TEXT_BODY);
         foodFilterCheck.setOpaque(false);
         tier2Row.add(foodFilterCheck);
-
-        acFilterCheck = new JCheckBox("AC");
-        acFilterCheck.setFont(HavenTheme.FONT_CAPTION);
-        acFilterCheck.setForeground(HavenTheme.TEXT_BODY);
-        acFilterCheck.setOpaque(false);
-        tier2Row.add(acFilterCheck);
 
         bathFilterCheck = new JCheckBox("Attached Bath");
         bathFilterCheck.setFont(HavenTheme.FONT_CAPTION);
@@ -482,7 +483,6 @@ public class MainFrame extends JFrame implements PanelMediator {
         wishlistFilterCheck.addActionListener(e -> applyFilters());
         wifiFilterCheck.addActionListener(e -> applyFilters());
         foodFilterCheck.addActionListener(e -> applyFilters());
-        acFilterCheck.addActionListener(e -> applyFilters());
         bathFilterCheck.addActionListener(e -> applyFilters());
         cctvFilterCheck.addActionListener(e -> applyFilters());
         powerFilterCheck.addActionListener(e -> applyFilters());
@@ -647,7 +647,6 @@ public class MainFrame extends JFrame implements PanelMediator {
         wishlistFilterCheck.setSelected(false);
         wifiFilterCheck.setSelected(false);
         foodFilterCheck.setSelected(false);
-        acFilterCheck.setSelected(false);
         bathFilterCheck.setSelected(false);
         cctvFilterCheck.setSelected(false);
         powerFilterCheck.setSelected(false);
@@ -742,7 +741,6 @@ public class MainFrame extends JFrame implements PanelMediator {
         List<String> requiredAmenities = new ArrayList<>();
         if (wifiFilterCheck.isSelected()) requiredAmenities.add("WiFi");
         if (foodFilterCheck.isSelected()) requiredAmenities.add("Food");
-        if (acFilterCheck.isSelected()) requiredAmenities.add("AC");
         if (bathFilterCheck.isSelected()) requiredAmenities.add("Washroom");
         if (cctvFilterCheck.isSelected()) requiredAmenities.add("CCTV");
         if (powerFilterCheck.isSelected()) requiredAmenities.add("Power Backup");
@@ -774,6 +772,8 @@ public class MainFrame extends JFrame implements PanelMediator {
         String sortChoice = (String) sortBox.getSelectedItem();
         if ("Rent: Low to High".equals(sortChoice)) {
             list.sort(Comparator.comparingDouble(Accommodation::getBaseRent));
+        } else if ("Rent: High to Low".equals(sortChoice)) {
+            list.sort((a, b) -> Double.compare(b.getBaseRent(), a.getBaseRent()));
         } else if ("Distance: Nearest".equals(sortChoice)) {
             list.sort(Comparator.comparingDouble(Accommodation::getDistanceKm));
         } else if ("Vacancies: High to Low".equals(sortChoice)) {

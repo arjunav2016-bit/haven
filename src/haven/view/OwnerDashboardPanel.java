@@ -44,7 +44,7 @@ public class OwnerDashboardPanel extends JPanel {
     private JComboBox<String> typeBox, genderBox;
     private JTextField messFeeField, curfewField, utilityField;
     private JCheckBox foodCheckBox;
-    private JCheckBox regWifiCheck, regFoodCheck, regAcCheck, regBathCheck, regCctvCheck, regPowerCheck;
+    private JCheckBox regWifiCheck, regFoodCheck, regBathCheck, regCctvCheck, regPowerCheck;
 
     private AnalyticsPanel analyticsPanel;
 
@@ -515,13 +515,11 @@ public class OwnerDashboardPanel extends JPanel {
         amenitiesCheckPanel.setOpaque(false);
         regWifiCheck = new JCheckBox("WiFi");
         regFoodCheck = new JCheckBox("Food / Mess");
-        regAcCheck = new JCheckBox("AC");
         regBathCheck = new JCheckBox("Attached Washroom");
         regCctvCheck = new JCheckBox("CCTV Security");
         regPowerCheck = new JCheckBox("Power Backup");
         amenitiesCheckPanel.add(regWifiCheck);
         amenitiesCheckPanel.add(regFoodCheck);
-        amenitiesCheckPanel.add(regAcCheck);
         amenitiesCheckPanel.add(regBathCheck);
         amenitiesCheckPanel.add(regCctvCheck);
         amenitiesCheckPanel.add(regPowerCheck);
@@ -663,7 +661,6 @@ public class OwnerDashboardPanel extends JPanel {
 
             if (regWifiCheck != null && regWifiCheck.isSelected()) newStay.addAmenity("WiFi");
             if (regFoodCheck != null && regFoodCheck.isSelected()) newStay.addAmenity("Food / Mess");
-            if (regAcCheck != null && regAcCheck.isSelected()) newStay.addAmenity("AC");
             if (regBathCheck != null && regBathCheck.isSelected()) newStay.addAmenity("Attached Washroom");
             if (regCctvCheck != null && regCctvCheck.isSelected()) newStay.addAmenity("CCTV Security");
             if (regPowerCheck != null && regPowerCheck.isSelected()) newStay.addAmenity("Power Backup");
@@ -674,7 +671,6 @@ public class OwnerDashboardPanel extends JPanel {
             addressField.setText(""); contactPhoneField.setText(""); locationLinkField.setText("");
             if (regWifiCheck != null) regWifiCheck.setSelected(false);
             if (regFoodCheck != null) regFoodCheck.setSelected(false);
-            if (regAcCheck != null) regAcCheck.setSelected(false);
             if (regBathCheck != null) regBathCheck.setSelected(false);
             if (regCctvCheck != null) regCctvCheck.setSelected(false);
             if (regPowerCheck != null) regPowerCheck.setSelected(false);

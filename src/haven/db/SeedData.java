@@ -15,13 +15,10 @@ import java.util.List;
  */
 public class SeedData {
 
-    private static void applyAmenities(Accommodation acc, boolean ac, boolean cctv, boolean study) {
+    private static void applyAmenities(Accommodation acc, boolean cctv, boolean study) {
         acc.addAmenity("WiFi");
         if (acc instanceof Hostel || (acc instanceof PG && ((PG) acc).isFoodIncluded())) {
             acc.addAmenity("Food / Mess");
-        }
-        if (ac) {
-            acc.addAmenity("AC");
         }
         acc.addAmenity("Attached Washroom");
         acc.addAmenity("Power Backup");
@@ -54,7 +51,7 @@ public class SeedData {
                 .contactPhone("9446684604")
                 .featured(true)
                 .build();
-        applyAmenities(h1, false, true, true);
+        applyAmenities(h1, true, true);
         list.add(h1);
 
         // 2. Vipas Hostel
@@ -73,7 +70,7 @@ public class SeedData {
                 .address("VIPAS HOUSE, IRA-76, Kairali Garden, Viswambharan Road, Pappanamcode")
                 .contactPhone("7012380210")
                 .build();
-        applyAmenities(h2, false, true, true);
+        applyAmenities(h2, true, true);
         list.add(h2);
 
         // 3. Akshay Hostel
@@ -92,7 +89,7 @@ public class SeedData {
                 .address("Amritha Lane, Kaimanam, Pappanamcode")
                 .contactPhone("8129795560, 8848567459")
                 .build();
-        applyAmenities(h3, false, false, true);
+        applyAmenities(h3, false, true);
         list.add(h3);
 
         // 4. Castello Boys Hostel
@@ -111,7 +108,7 @@ public class SeedData {
                 .address("TC 52/1904, Kaimanam, Thiruvananthapuram-40")
                 .contactPhone("8281412050")
                 .build();
-        applyAmenities(h4, false, true, false);
+        applyAmenities(h4, true, false);
         list.add(h4);
 
         // 5. Atham PG (Constructed via PGBuilder)
@@ -131,7 +128,7 @@ public class SeedData {
                 .contactPhone("8848726001")
                 .featured(true)
                 .build();
-        applyAmenities(pg1, true, false, false);
+        applyAmenities(pg1, false, false);
         list.add(pg1);
 
         // 6. Niaz Hostel
@@ -150,7 +147,7 @@ public class SeedData {
                 .address("Niyas Building, Karakkamandapam, Nemom P O")
                 .contactPhone("9446384740, 8848096564")
                 .build();
-        applyAmenities(h6, false, false, true);
+        applyAmenities(h6, false, true);
         list.add(h6);
 
         // 7. Panchami Boys Hostel
@@ -169,7 +166,7 @@ public class SeedData {
                 .address("Panchami, Estate Road, Pappanamcode")
                 .contactPhone("9633100600")
                 .build();
-        applyAmenities(h7, false, true, false);
+        applyAmenities(h7, true, false);
         list.add(h7);
 
         // 8. Deepa Prabha Ladies Hostel
@@ -189,7 +186,7 @@ public class SeedData {
                 .contactPhone("9633391299, 9995460253")
                 .featured(true)
                 .build();
-        applyAmenities(gh1, false, true, true);
+        applyAmenities(gh1, true, true);
         list.add(gh1);
 
         // 9. Sai Hostel
@@ -208,7 +205,7 @@ public class SeedData {
                 .address("TC 53/1965, Parthipuri, Pappanamcode, Opposite Cavaliar India Coaching Centre")
                 .contactPhone("9497853750, 7306842191")
                 .build();
-        applyAmenities(gh2, false, true, false);
+        applyAmenities(gh2, true, false);
         list.add(gh2);
 
         // 10. Chinnus Hostel
@@ -227,7 +224,7 @@ public class SeedData {
                 .address("TC 53/110, Palace Lane, Opposite KSRTC Central Work, Pappanamcode")
                 .contactPhone("9496260318, 6238153429")
                 .build();
-        applyAmenities(gh3, false, true, true);
+        applyAmenities(gh3, true, true);
         list.add(gh3);
 
         // 11. Arafa BETA Girls Hostel
@@ -246,7 +243,7 @@ public class SeedData {
                 .address("ARAFA, Anugraha, Near Pappanamcode market")
                 .contactPhone("8137983167, 8848790950")
                 .build();
-        applyAmenities(gh4, false, true, true);
+        applyAmenities(gh4, true, true);
         list.add(gh4);
 
         // 12. Sudarsanam Ladies Hostel
@@ -265,7 +262,7 @@ public class SeedData {
                 .address("KNRA-90, Vivek Nagar, NSS Karayogam Road, Kaimanam")
                 .contactPhone("9846724455")
                 .build();
-        applyAmenities(gh5, false, true, false);
+        applyAmenities(gh5, true, false);
         list.add(gh5);
 
         // 13. Sree Sakthi Ladies Hostel
@@ -284,7 +281,7 @@ public class SeedData {
                 .address("VS Apartments, Chirakara Lane, Kaimanam, Pappanamcode")
                 .contactPhone("8129795560, 8848567459")
                 .build();
-        applyAmenities(gh6, false, true, true);
+        applyAmenities(gh6, true, true);
         list.add(gh6);
 
         // 14. GBR Hostel
@@ -303,7 +300,7 @@ public class SeedData {
                 .address("TC 52/46, Padmanabham, Chirakara Lane, Kaimanam, Pappanamcode")
                 .contactPhone("9497268740, 6282991466")
                 .build();
-        applyAmenities(gh7, false, true, false);
+        applyAmenities(gh7, true, false);
         list.add(gh7);
 
         // 15. Aashiyana Hostel
@@ -322,7 +319,7 @@ public class SeedData {
                 .address("Karakkamandapam junction, Nemom")
                 .contactPhone("8137872437, 9447229223")
                 .build();
-        applyAmenities(gh8, false, true, false);
+        applyAmenities(gh8, true, false);
         list.add(gh8);
 
         // 16. Panchami Girls Hostel
@@ -341,7 +338,7 @@ public class SeedData {
                 .address("Panchami, Estate Road, Pappanamcode")
                 .contactPhone("9633100600")
                 .build();
-        applyAmenities(gh9, false, true, false);
+        applyAmenities(gh9, true, false);
         list.add(gh9);
 
         return list;

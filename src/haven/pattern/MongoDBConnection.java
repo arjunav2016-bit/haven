@@ -21,7 +21,8 @@ public class MongoDBConnection {
     private MongoDBConnection() {
         MongoClientSettings settings = MongoClientSettings.builder()
                 .applyConnectionString(new ConnectionString(CONNECTION_URI))
-                .applyToClusterSettings(builder -> builder.serverSelectionTimeout(2500, TimeUnit.MILLISECONDS))
+                .applyToClusterSettings(builder -> builder.serverSelectionTimeout(2000, TimeUnit.MILLISECONDS))
+                .applyToSocketSettings(builder -> builder.connectTimeout(2000, TimeUnit.MILLISECONDS).readTimeout(2000, TimeUnit.MILLISECONDS))
                 .build();
         this.mongoClient = MongoClients.create(settings);
         this.database = mongoClient.getDatabase(DATABASE_NAME);

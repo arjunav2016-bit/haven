@@ -10,6 +10,10 @@ public class GoogleMapsAdapter implements NavigationService {
         try {
             if (locationLink == null || locationLink.trim().isEmpty()) {
                 System.err.println("No location link available to navigate.");
+                javax.swing.JOptionPane.showMessageDialog(null,
+                        "No geographic location link is available for this property.",
+                        "Navigation Notice",
+                        javax.swing.JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
             String url = locationLink.trim();

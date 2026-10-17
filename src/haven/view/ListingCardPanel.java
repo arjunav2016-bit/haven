@@ -102,8 +102,9 @@ public class ListingCardPanel extends JPanel {
 
         // =========================================================================
         // LEFT COLUMN: PROPERTY PHOTO THUMBNAIL (Clickable for ImageGalleryDialog)
-        // =========================================================================
-        PropertyImageStorage.ensureDefaultImagesForAccommodation(accommodation);
+        try {
+            PropertyImageStorage.ensureDefaultImagesForAccommodation(accommodation);
+        } catch (Exception ignored) {}
         List<String> imgPaths = accommodation.getImagePaths();
         String primaryImg = imgPaths.isEmpty() ? null : imgPaths.get(0);
 
@@ -111,29 +112,44 @@ public class ListingCardPanel extends JPanel {
         thumbPanel.setOpaque(false);
         thumbPanel.setPreferredSize(new Dimension(136, 132));
 
-        JLabel thumbLabel = new JLabel("", SwingConstants.CENTER);
-        ImageIcon icon = PropertyImageStorage.loadScaledIcon(primaryImg, 134, 104);
-        if (icon != null) {
-            thumbLabel.setIcon(icon);
-        } else {
-            thumbLabel.setIcon(new ImageIcon(PropertyImageStorage.createPlaceholderImage(accommodation.getName(), 134, 104)));
+        JComponent imageThumbComponent;
+        ImageIcon icon = null;
+        if (primaryImg != null && new java.io.File(primaryImg).exists()) {
+            icon = PropertyImageStorage.loadScaledIcon(primaryImg, 134, 104);
         }
-        thumbLabel.setBorder(new LineBorder(HavenTheme.BORDER_LIGHT, 1));
-        thumbLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        thumbLabel.setToolTipText("Click to open full photo gallery (" + imgPaths.size() + " photos)");
-        thumbLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                openPhotoGallery();
-            }
-        });
+
+        if (icon != null) {
+            JLabel thumbLabel = new JLabel("", SwingConstants.CENTER);
+            thumbLabel.setIcon(icon);
+            thumbLabel.setBorder(new LineBorder(HavenTheme.BORDER_LIGHT, 1));
+            thumbLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            thumbLabel.setToolTipText("Click to open full photo gallery (" + imgPaths.size() + " photos)");
+            thumbLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    openPhotoGallery();
+                }
+            });
+            imageThumbComponent = thumbLabel;
+        } else {
+            JPanel fallbackPanel = createFallbackImagePanel(accommodation.getName(), 134, 104);
+            fallbackPanel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            fallbackPanel.setToolTipText("No photo file available on disk. Click to open gallery or upload.");
+            fallbackPanel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    openPhotoGallery();
+                }
+            });
+            imageThumbComponent = fallbackPanel;
+        }
 
         JButton galleryChipBtn = ModernButton.subtle("Photos (" + imgPaths.size() + ")");
         galleryChipBtn.setFont(HavenTheme.FONT_BADGE);
         galleryChipBtn.setBorder(new EmptyBorder(2, 4, 2, 4));
         galleryChipBtn.addActionListener(e -> openPhotoGallery());
 
-        thumbPanel.add(thumbLabel, BorderLayout.CENTER);
+        thumbPanel.add(imageThumbComponent, BorderLayout.CENTER);
         thumbPanel.add(galleryChipBtn, BorderLayout.SOUTH);
         add(thumbPanel, BorderLayout.WEST);
 
@@ -579,5 +595,41 @@ public class ListingCardPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Failed to submit enquiry: " + ex.getMessage(), "Booking Error", JOptionPane.ERROR_MESSAGE);
             }
         }
+    }
+
+    private JPanel createFallbackImagePanel(String title, int width, int height) {
+        JPanel fallback = new JPanel(new GridBagLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setPaint(new GradientPaint(0, 0, new Color(241, 245, 249), 0, height, new Color(226, 232, 240)));
+                g2.fillRect(0, 0, width, height);
+                g2.dispose();
+            }
+        };
+        fallback.setPreferredSize(new Dimension(width, height));
+        fallback.setBorder(new LineBorder(HavenTheme.BORDER_LIGHT, 1));
+
+        JPanel inner = new JPanel();
+        inner.setLayout(new BoxLayout(inner, BoxLayout.Y_AXIS));
+        inner.setOpaque(false);
+
+        JLabel noImgLbl = new JLabel("No Image", SwingConstants.CENTER);
+        noImgLbl.setFont(HavenTheme.FONT_CAPTION_BOLD);
+        noImgLbl.setForeground(HavenTheme.TEXT_SECONDARY);
+        noImgLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel subLbl = new JLabel("Available", SwingConstants.CENTER);
+        subLbl.setFont(HavenTheme.FONT_BADGE);
+        subLbl.setForeground(HavenTheme.TEXT_MUTED);
+        subLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        inner.add(noImgLbl);
+        inner.add(Box.createVerticalStrut(2));
+        inner.add(subLbl);
+        fallback.add(inner);
+        return fallback;
     }
 }

@@ -19,8 +19,18 @@ import java.nio.file.StandardCopyOption;
  */
 public final class PropertyImageStorage {
     public static final String IMAGES_ROOT_DIR = "images";
+    private static final java.util.Map<String, javax.swing.ImageIcon> ICON_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
 
     private PropertyImageStorage() {}
+
+    public static void clearIconCache() {
+        ICON_CACHE.clear();
+    }
+
+    public static void invalidateIcon(String path) {
+        if (path == null) return;
+        ICON_CACHE.keySet().removeIf(k -> k.startsWith(path + "@"));
+    }
 
     /**
      * Copies a user-selected image file into {@code images/<accommodationId>/<filename>}
@@ -46,7 +56,9 @@ public final class PropertyImageStorage {
         Path targetPath = targetDir.resolve(targetFileName);
 
         Files.copy(sourceFile.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
-        return targetPath.toString().replace('\\', '/');
+        String relativePath = targetPath.toString().replace('\\', '/');
+        invalidateIcon(relativePath);
+        return relativePath;
     }
 
     /**
@@ -189,16 +201,25 @@ public final class PropertyImageStorage {
 
     /**
      * Loads and scales an image from disk into a Swing {@link javax.swing.ImageIcon}.
+     * Employs an in-memory ConcurrentHashMap cache to eliminate synchronous disk I/O on the Swing EDT.
      */
     public static javax.swing.ImageIcon loadScaledIcon(String path, int width, int height) {
         if (path == null || path.trim().isEmpty()) return null;
+        String cacheKey = path.trim() + "@" + width + "x" + height;
+        javax.swing.ImageIcon cached = ICON_CACHE.get(cacheKey);
+        if (cached != null) {
+            return cached;
+        }
+
         try {
-            File file = new File(path);
-            if (!file.exists()) return null;
+            File file = new File(path.trim());
+            if (!file.exists() || !file.isFile()) return null;
             BufferedImage img = ImageIO.read(file);
             if (img == null) return null;
             Image scaled = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-            return new javax.swing.ImageIcon(scaled);
+            javax.swing.ImageIcon icon = new javax.swing.ImageIcon(scaled);
+            ICON_CACHE.put(cacheKey, icon);
+            return icon;
         } catch (Exception e) {
             return null;
         }

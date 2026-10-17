@@ -268,31 +268,30 @@ public class MongoAccommodationRepository implements AccommodationRepository {
         String address = doc.getString("address") != null ? doc.getString("address") : "";
         String contactPhone = doc.getString("contactPhone") != null ? doc.getString("contactPhone") : "";
         String locationLink = doc.getString("locationLink");
-        Double latObj = doc.getDouble("latitude");
-        Double lonObj = doc.getDouble("longitude");
-        double lat = (latObj != null) ? latObj : 0.0;
-        double lon = (lonObj != null) ? lonObj : 0.0;
+        double lat = getDoubleSafe(doc, "latitude", 0.0);
+        double lon = getDoubleSafe(doc, "longitude", 0.0);
 
         if (locationLink == null || locationLink.trim().isEmpty() || locationLink.matches(".*query=-?\\d+\\.\\d+,-?\\d+\\.\\d+.*")) {
             locationLink = Accommodation.buildLocationSearchUrl(doc.getString("name"), address, doc.getString("nearbyCollege"));
         }
 
         Accommodation acc;
-        if ("HOSTEL".equalsIgnoreCase(type)) {
+        boolean isHostel = type == null || "HOSTEL".equalsIgnoreCase(type.trim());
+        if (isHostel) {
             acc = new Hostel(
                     doc.getString("id"),
                     doc.getString("ownerId"),
                     doc.getString("name"),
                     doc.getString("nearbyCollege"),
-                    doc.getDouble("baseRent"),
-                    doc.getDouble("distanceKm"),
+                    getDoubleSafe(doc, "baseRent", 4500.0),
+                    getDoubleSafe(doc, "distanceKm", 1.0),
                     doc.getString("genderAllowed"),
                     doc.getInteger("vacancies", 0),
                     locationLink,
                     lat,
                     lon,
-                    doc.getDouble("fixedMessFee"),
-                    doc.getString("curfewTime"),
+                    getDoubleSafe(doc, "fixedMessFee", 2500.0),
+                    doc.getString("curfewTime") != null ? doc.getString("curfewTime") : "9:30 PM",
                     address,
                     contactPhone
             );
@@ -302,15 +301,15 @@ public class MongoAccommodationRepository implements AccommodationRepository {
                     doc.getString("ownerId"),
                     doc.getString("name"),
                     doc.getString("nearbyCollege"),
-                    doc.getDouble("baseRent"),
-                    doc.getDouble("distanceKm"),
+                    getDoubleSafe(doc, "baseRent", 4500.0),
+                    getDoubleSafe(doc, "distanceKm", 1.0),
                     doc.getString("genderAllowed"),
                     doc.getInteger("vacancies", 0),
                     locationLink,
                     lat,
                     lon,
-                    doc.getBoolean("foodIncluded", false),
-                    doc.getDouble("utilityCharges"),
+                    Boolean.TRUE.equals(doc.getBoolean("foodIncluded")),
+                    getDoubleSafe(doc, "utilityCharges", 500.0),
                     address,
                     contactPhone
             );
@@ -347,5 +346,18 @@ public class MongoAccommodationRepository implements AccommodationRepository {
             acc.setFeatured(true);
         }
         return acc;
+    }
+
+    private static double getDoubleSafe(Document doc, String key, double defaultValue) {
+        if (doc == null) return defaultValue;
+        Object val = doc.get(key);
+        if (val instanceof Number) {
+            return ((Number) val).doubleValue();
+        } else if (val instanceof String) {
+            try {
+                return Double.parseDouble(((String) val).trim());
+            } catch (NumberFormatException ignored) {}
+        }
+        return defaultValue;
     }
 }

@@ -13,10 +13,12 @@ import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
 import org.jxmapviewer.input.PanMouseInputListener;
 import org.jxmapviewer.input.ZoomMouseWheelListenerCursor;
+import org.jxmapviewer.cache.FileBasedLocalCache;
 import org.jxmapviewer.painter.Painter;
 import org.jxmapviewer.viewer.DefaultTileFactory;
 import org.jxmapviewer.viewer.GeoPosition;
 import org.jxmapviewer.viewer.TileFactoryInfo;
+import org.jxmapviewer.viewer.empty.EmptyTileFactory;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -26,6 +28,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -134,12 +137,25 @@ public class MapPanel extends JPanel {
 
         add(toolbar, BorderLayout.NORTH);
 
-        // 2. Configure JXMapViewer2 with OpenStreetMap Tile Factory
+        // 2. Configure JXMapViewer2 with OpenStreetMap Tile Factory and Local Disk Cache
         mapViewer = new JXMapViewer();
-        TileFactoryInfo info = new OSMTileFactoryInfo("OpenStreetMap", "https://tile.openstreetmap.org");
-        DefaultTileFactory tileFactory = new DefaultTileFactory(info);
-        tileFactory.setThreadPoolSize(4);
-        mapViewer.setTileFactory(tileFactory);
+        try {
+            TileFactoryInfo info = new OSMTileFactoryInfo("OpenStreetMap", "https://tile.openstreetmap.org");
+            DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+            tileFactory.setUserAgent("HAVEN-StudentAccommodationPlatform/2.0 (JavaSwing; Trivandrum; Contact: admin@haven.local)");
+            File cacheDir = new File("data/cache/tiles");
+            if (!cacheDir.exists()) {
+                cacheDir.mkdirs();
+            }
+            tileFactory.setLocalCache(new FileBasedLocalCache(cacheDir, false));
+            tileFactory.setThreadPoolSize(4);
+            mapViewer.setTileFactory(tileFactory);
+        } catch (Exception ex) {
+            System.err.println("[MapPanel] Notice: Initializing offline fallback map tile factory: " + ex.getMessage());
+            try {
+                mapViewer.setTileFactory(new EmptyTileFactory());
+            } catch (Exception ignored) {}
+        }
 
         // Default center: SCTCE Pappanamcode
         mapViewer.setZoom(5);
@@ -427,6 +443,19 @@ public class MapPanel extends JPanel {
             Rectangle viewport = map.getViewportBounds();
             int zoom = map.getZoom();
 
+            // Background grid fallback if running in offline mode with EmptyTileFactory
+            if (map.getTileFactory() instanceof EmptyTileFactory) {
+                g2.setColor(new Color(248, 250, 252));
+                g2.fillRect(0, 0, width, height);
+                g2.setColor(new Color(226, 232, 240));
+                for (int gx = 0; gx < width; gx += 40) {
+                    g2.drawLine(gx, 0, gx, height);
+                }
+                for (int gy = 0; gy < height; gy += 40) {
+                    g2.drawLine(0, gy, width, gy);
+                }
+            }
+
             // 1. Paint Engineering College Landmarks
             for (Map.Entry<String, GeoPosition> entry : CAMPUS_LOCATIONS.entrySet()) {
                 if (entry.getKey().startsWith("All")) continue;
@@ -509,6 +538,17 @@ public class MapPanel extends JPanel {
                     g2.drawString(nameTag, x - nw / 2, y - 34 - r);
                 }
             }
+
+            // 3. Status indicator pill in bottom-left
+            g2.setFont(HavenTheme.FONT_BADGE);
+            String modeStr = (map.getTileFactory() instanceof EmptyTileFactory)
+                    ? "● Offline Map Mode (Landmarks & Pins Active)"
+                    : "● Map Active (OSM / Local Cache)";
+            int mw = g2.getFontMetrics().stringWidth(modeStr);
+            g2.setColor(new Color(15, 23, 42, 175));
+            g2.fillRoundRect(12, height - 30, mw + 16, 20, 6, 6);
+            g2.setColor(Color.WHITE);
+            g2.drawString(modeStr, 20, height - 16);
 
             g2.dispose();
         }

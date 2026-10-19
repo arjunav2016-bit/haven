@@ -134,6 +134,7 @@ public class StudentEnquiriesPanel extends JPanel {
         enquiriesTable.getColumnModel().getColumn(5).setCellRenderer(new StatusBadgeRenderer());
 
         scrollPane = new JScrollPane(enquiriesTable);
+        scrollPane.getViewport().setBackground(HavenTheme.SURFACE_WHITE);
         scrollPane.setBorder(new LineBorder(HavenTheme.BORDER_LIGHT, 1));
         centerPanel.add(scrollPane, BorderLayout.CENTER);
 
@@ -251,6 +252,7 @@ public class StudentEnquiriesPanel extends JPanel {
         countLabel.setText("Showing " + count + " enquiry / booking record" + (count == 1 ? "" : "s") + ".");
 
         if (count == 0) {
+            scrollPane.setColumnHeaderView(null);
             scrollPane.setViewportView(EmptyStatePanel.forEnquiries(() -> {
                 if (statusFilterBox != null && statusFilterBox.getSelectedIndex() != 0) {
                     statusFilterBox.setSelectedIndex(0);
@@ -259,7 +261,14 @@ public class StudentEnquiriesPanel extends JPanel {
                 }
             }));
         } else {
+            scrollPane.setColumnHeaderView(enquiriesTable.getTableHeader());
             scrollPane.setViewportView(enquiriesTable);
+        }
+        scrollPane.revalidate();
+        scrollPane.repaint();
+        if (enquiriesTable != null) {
+            enquiriesTable.revalidate();
+            enquiriesTable.repaint();
         }
     }
 

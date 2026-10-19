@@ -161,7 +161,7 @@ public class MainFrame extends JFrame implements PanelMediator {
             dialog.setVisible(true);
         });
 
-        switchModeBtn = ModernButton.primary(currentUser.isAdmin() ? "Switch to Admin Portal" : "Switch to Owner Mode");
+        switchModeBtn = ModernButton.primary(currentUser.isAdmin() ? "Switch to Admin Portal" : (currentUser.isOwner() ? "Switch to Student Mode" : "Switch to Owner Portal"));
 
         JButton logoutBtn = ModernButton.secondary("Logout");
         logoutBtn.addActionListener(e -> handleLogout());
@@ -169,9 +169,7 @@ public class MainFrame extends JFrame implements PanelMediator {
         userControlsPanel.add(userBadge);
         userControlsPanel.add(notificationBellBtn);
         userControlsPanel.add(profileBtn);
-        if (currentUser.isOwner() || currentUser.isAdmin()) {
-            userControlsPanel.add(switchModeBtn);
-        }
+        userControlsPanel.add(switchModeBtn);
         userControlsPanel.add(logoutBtn);
         topPanel.add(titleLabel, BorderLayout.WEST);
         topPanel.add(userControlsPanel, BorderLayout.EAST);
@@ -614,11 +612,11 @@ public class MainFrame extends JFrame implements PanelMediator {
             switchModeBtn.setText("Switch to Student View");
             adminPanel.refreshAllTabs();
         } else if ("OWNER".equals(mode)) {
-            switchModeBtn.setText("Switch to Student Mode");
+            switchModeBtn.setText(currentUser.isOwner() ? "Switch to Student Mode" : "Switch to Student View");
             ownerPanel.refreshTable();
             ownerPanel.refreshEnquiriesTable();
         } else {
-            switchModeBtn.setText(currentUser.isAdmin() ? "Switch to Admin Portal" : "Switch to Owner Mode");
+            switchModeBtn.setText(currentUser.isAdmin() ? "Switch to Admin Portal" : (currentUser.isOwner() ? "Switch to Owner Mode" : "Switch to Owner Portal"));
             applyFilters();
         }
     }

@@ -17,6 +17,7 @@ import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * OwnerDashboardPanel - Property Owner Portal.
@@ -38,6 +39,9 @@ public class OwnerDashboardPanel extends JPanel {
     private DefaultTableModel enquiryTableModel;
     private JTable enquiryTable;
     private List<Enquiry> currentEnquiries;
+    private JScrollPane enquiryScrollPane;
+    private JComboBox<String> enquiryStatusFilter;
+    private JLabel enquiryCountLabel;
 
     private JTextField nameField, collegeField, rentField, distanceField, vacancyField, locationLinkField;
     private JTextField addressField, contactPhoneField;
@@ -66,7 +70,12 @@ public class OwnerDashboardPanel extends JPanel {
         tabbedPane.addTab("Analytics & Revenue", analyticsPanel);
 
         tabbedPane.addChangeListener(e -> {
-            if (tabbedPane.getSelectedIndex() == 3 && analyticsPanel != null) {
+            int idx = tabbedPane.getSelectedIndex();
+            if (idx == 0) {
+                refreshTable();
+            } else if (idx == 2) {
+                refreshEnquiriesTable();
+            } else if (idx == 3 && analyticsPanel != null) {
                 analyticsPanel.refreshData();
             }
         });
@@ -295,6 +304,32 @@ public class OwnerDashboardPanel extends JPanel {
         panel.setBorder(new EmptyBorder(16, 16, 16, 16));
         panel.setBackground(HavenTheme.BG_CANVAS);
 
+        // Header toolbar with Status Filter & Count
+        JPanel headerBar = new JPanel(new BorderLayout(10, 0));
+        headerBar.setOpaque(false);
+        headerBar.setBorder(new EmptyBorder(0, 0, 8, 0));
+
+        enquiryCountLabel = new JLabel("Manage student applicants and room booking enquiries.");
+        enquiryCountLabel.setFont(HavenTheme.FONT_BODY);
+        enquiryCountLabel.setForeground(HavenTheme.TEXT_SECONDARY);
+        headerBar.add(enquiryCountLabel, BorderLayout.WEST);
+
+        JPanel filterBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        filterBar.setOpaque(false);
+        JLabel filterLbl = new JLabel("Status Filter:");
+        filterLbl.setFont(HavenTheme.FONT_CAPTION_BOLD);
+        filterLbl.setForeground(HavenTheme.TEXT_PRIMARY);
+        filterBar.add(filterLbl);
+
+        enquiryStatusFilter = new JComboBox<>(new String[]{
+                "Active Enquiries", "All Enquiries", "PENDING", "CONTACTED", "CONFIRMED", "DECLINED", "CANCELLED"
+        });
+        enquiryStatusFilter.setFont(HavenTheme.FONT_BODY);
+        enquiryStatusFilter.addActionListener(e -> refreshEnquiriesTable());
+        filterBar.add(enquiryStatusFilter);
+        headerBar.add(filterBar, BorderLayout.EAST);
+        panel.add(headerBar, BorderLayout.NORTH);
+
         String[] cols = {"ID", "Date", "Property", "Student", "Phone", "Status", "Message"};
         enquiryTableModel = new DefaultTableModel(cols, 0) {
             @Override
@@ -316,9 +351,10 @@ public class OwnerDashboardPanel extends JPanel {
         // Status badge color renderer
         enquiryTable.getColumnModel().getColumn(5).setCellRenderer(new StatusBadgeRenderer());
 
-        JScrollPane scrollPane = new JScrollPane(enquiryTable);
-        scrollPane.setBorder(new LineBorder(HavenTheme.BORDER_LIGHT, 1));
-        panel.add(scrollPane, BorderLayout.CENTER);
+        enquiryScrollPane = new JScrollPane(enquiryTable);
+        enquiryScrollPane.getViewport().setBackground(HavenTheme.SURFACE_WHITE);
+        enquiryScrollPane.setBorder(new LineBorder(HavenTheme.BORDER_LIGHT, 1));
+        panel.add(enquiryScrollPane, BorderLayout.CENTER);
 
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
         btnPanel.setOpaque(false);
@@ -434,7 +470,7 @@ public class OwnerDashboardPanel extends JPanel {
 
     public void refreshTable() {
         tableModel.setRowCount(0);
-        String ownerUsername = (currentUser != null && currentUser.getUsername() != null) ? currentUser.getUsername() : "owner";
+        String ownerUsername = (currentUser != null && currentUser.isOwner()) ? currentUser.getUsername() : "owner";
         currentListings = dao.getAccommodationsByOwner(ownerUsername);
         for (Accommodation a : currentListings) {
             String type = (a instanceof Hostel) ? "Hostel" : "PG";
@@ -447,8 +483,25 @@ public class OwnerDashboardPanel extends JPanel {
 
     public void refreshEnquiriesTable() {
         enquiryTableModel.setRowCount(0);
-        String ownerUsername = (currentUser != null && currentUser.getUsername() != null) ? currentUser.getUsername() : "owner";
-        currentEnquiries = enquiryDAO.getEnquiriesForOwner(ownerUsername);
+        String ownerUsername = (currentUser != null && currentUser.isOwner()) ? currentUser.getUsername() : "owner";
+        List<Enquiry> all = enquiryDAO.getEnquiriesForOwner(ownerUsername);
+
+        String filter = (enquiryStatusFilter != null && enquiryStatusFilter.getSelectedItem() != null)
+                ? (String) enquiryStatusFilter.getSelectedItem()
+                : "Active Enquiries";
+
+        if ("Active Enquiries".equalsIgnoreCase(filter)) {
+            currentEnquiries = all.stream()
+                    .filter(eq -> !"DECLINED".equalsIgnoreCase(eq.getStatus()) && !"CANCELLED".equalsIgnoreCase(eq.getStatus()))
+                    .collect(Collectors.toList());
+        } else if ("All Enquiries".equalsIgnoreCase(filter)) {
+            currentEnquiries = all;
+        } else {
+            currentEnquiries = all.stream()
+                    .filter(eq -> filter.equalsIgnoreCase(eq.getStatus()))
+                    .collect(Collectors.toList());
+        }
+
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM HH:mm");
         for (Enquiry eq : currentEnquiries) {
             enquiryTableModel.addRow(new Object[]{
@@ -460,6 +513,27 @@ public class OwnerDashboardPanel extends JPanel {
                     eq.getStatus(),
                     eq.getMessage()
             });
+        }
+
+        int count = currentEnquiries.size();
+        if (enquiryCountLabel != null) {
+            enquiryCountLabel.setText("Showing " + count + " enquiry record" + (count == 1 ? "" : "s") + " (" + filter + ").");
+        }
+
+        if (enquiryScrollPane != null) {
+            if (count == 0) {
+                enquiryScrollPane.setColumnHeaderView(null);
+                enquiryScrollPane.setViewportView(EmptyStatePanel.forOwnerEnquiries(this::refreshEnquiriesTable));
+            } else {
+                enquiryScrollPane.setColumnHeaderView(enquiryTable.getTableHeader());
+                enquiryScrollPane.setViewportView(enquiryTable);
+            }
+            enquiryScrollPane.revalidate();
+            enquiryScrollPane.repaint();
+            if (enquiryTable != null) {
+                enquiryTable.revalidate();
+                enquiryTable.repaint();
+            }
         }
     }
 
@@ -630,7 +704,7 @@ public class OwnerDashboardPanel extends JPanel {
             }
 
             String newId = "ACC-" + UUID.randomUUID().toString().substring(0, 5).toUpperCase();
-            String ownerId = (currentUser != null && currentUser.getUsername() != null) ? currentUser.getUsername() : "owner";
+            String ownerId = (currentUser != null && currentUser.isOwner()) ? currentUser.getUsername() : "owner";
             Accommodation newStay;
 
             if ("Hostel".equals(type)) {

@@ -271,8 +271,12 @@ public class MongoAccommodationRepository implements AccommodationRepository {
         double lat = getDoubleSafe(doc, "latitude", 0.0);
         double lon = getDoubleSafe(doc, "longitude", 0.0);
 
-        if (locationLink == null || locationLink.trim().isEmpty() || locationLink.matches(".*query=-?\\d+\\.\\d+,-?\\d+\\.\\d+.*")) {
-            locationLink = Accommodation.buildLocationSearchUrl(doc.getString("name"), address, doc.getString("nearbyCollege"));
+        if (locationLink == null || locationLink.trim().isEmpty()) {
+            if (lat != 0.0 && lon != 0.0) {
+                locationLink = "https://www.google.com/maps/search/?api=1&query=" + lat + "," + lon;
+            } else {
+                locationLink = Accommodation.buildLocationSearchUrl(doc.getString("name"), address, doc.getString("nearbyCollege"));
+            }
         }
 
         Accommodation acc;

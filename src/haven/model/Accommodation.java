@@ -108,7 +108,14 @@ public abstract class Accommodation {
     public String getGenderAllowed() { return genderAllowed; }
     public int getVacancies() { return vacancies; }
     public String getLocationLink() {
-        if (locationLink != null && !locationLink.trim().isEmpty() && !locationLink.matches(".*query=-?\\d+\\.\\d+,-?\\d+\\.\\d+.*")) {
+        if (locationLink != null && !locationLink.trim().isEmpty() &&
+                (locationLink.contains("/place/") || locationLink.contains("goo.gl"))) {
+            return locationLink;
+        }
+        if (latitude != 0.0 && longitude != 0.0) {
+            return "https://www.google.com/maps/search/?api=1&query=" + latitude + "," + longitude;
+        }
+        if (locationLink != null && !locationLink.trim().isEmpty()) {
             return locationLink;
         }
         return buildLocationSearchUrl(name, address, nearbyCollege);

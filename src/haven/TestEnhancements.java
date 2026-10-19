@@ -253,6 +253,17 @@ public class TestEnhancements {
         bus.unsubscribe(AccommodationEvent.class, daoAccListener);
         bus.unsubscribe(ReviewEvent.class, daoRevListener);
         bus.unsubscribe(EnquiryEvent.class, daoEqListener);
+
+        // Cleanup test fixtures so persistent JSON store remains pristine
+        for (Enquiry eqCleanup : testEnquiryDAO.getEnquiriesForStudent("test_student")) {
+            testEnquiryDAO.deleteEnquiry(eqCleanup.getEnquiryId());
+        }
+        for (Review revCleanup : testReviewDAO.getReviewsForAccommodation("BH01")) {
+            if ("test_auto".equals(revCleanup.getUsername())) {
+                testReviewDAO.deleteReview(revCleanup.getId());
+            }
+        }
+        haven.db.InMemoryStore.getInstance().persist();
         System.out.println("PASSED! (All 3 DAO facades fire exactly 1 typed event per mutation without duplicates)");
 
         // 14. Verify StatusBadgeRenderer Reusability (DRY Principle)

@@ -43,5 +43,9 @@ public class ReviewDAO {
     public boolean hasUserReviewed(String accommodationId, String username) {
         return repository.hasUserReviewed(accommodationId, username);
     }
+
+    public void deleteReview(String reviewId) {
+        repository.deleteById(reviewId);
+    }
 }
 

@@ -102,5 +102,5 @@
    - Open the **Admin Governance Portal** ([`AdminDashboardPanel`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/view/AdminDashboardPanel.java)).
    - In **Property Moderation**, click **"Toggle Featured (★)"** or **"Flag Listing"**, then click **"Undo"** and **"Redo"** in the header bar to demonstrate the **Command Pattern** live.
    - In **System Analytics & Data**, click **"Export System Analytics Report (.txt)"** to demonstrate the **Template Method Pattern**.
-5. **Run the 30-Test Verification Suite**:
-   - Run `java -ea -cp "bin;lib/*" haven.TestEnhancements` to show all 30 automated assertion tests passing.
+5. **Run the 34-Test Verification Suite**:
+   - Run `java -ea -cp "bin;lib/*" haven.TestEnhancements` to show all 34 automated assertion tests passing.

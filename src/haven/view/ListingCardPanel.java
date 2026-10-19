@@ -501,7 +501,9 @@ public class ListingCardPanel extends JPanel {
     }
 
     public void openEnquiryDialog() {
-        String defaultPhone = (currentUser != null && currentUser.getPhone() != null) ? currentUser.getPhone() : "";
+        String defaultPhone = (currentUser != null && currentUser.getPhone() != null && !currentUser.getPhone().trim().isEmpty())
+                ? currentUser.getPhone()
+                : "9876543210";
         JTextField phoneField = new JTextField(defaultPhone, 15);
         phoneField.setFont(HavenTheme.FONT_BODY);
         phoneField.setBorder(HavenTheme.createInputPadding());
@@ -572,7 +574,7 @@ public class ListingCardPanel extends JPanel {
                 }
 
                 try {
-                    String username = (currentUser != null && currentUser.getUsername() != null) ? currentUser.getUsername() : "student";
+                    String username = (currentUser != null && currentUser.isStudent()) ? currentUser.getUsername() : "student";
                     enquiryDAO.saveEnquiry(accommodation.getId(), accommodation.getName(), accommodation.getOwnerId(), username, phone, message);
                 } catch (Exception ex) {
                     hostelDAO.incrementVacancy(accommodation.getId());

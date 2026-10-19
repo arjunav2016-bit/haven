@@ -84,12 +84,14 @@ public class InMemoryStore {
                     Accommodation s = seedCoords.get(acc.getId());
                     acc.setLatitude(s.getLatitude());
                     acc.setLongitude(s.getLongitude());
+                    acc.setLocationLink("https://www.google.com/maps/search/?api=1&query=" + s.getLatitude() + "," + s.getLongitude());
                 }
                 PropertyImageStorage.ensureDefaultImagesForAccommodation(acc);
             }
             if (images.isEmpty()) {
                 seedDefaultImagesFromAccommodations();
             }
+            persist();
         } else {
             seedDefaultStore();
         }

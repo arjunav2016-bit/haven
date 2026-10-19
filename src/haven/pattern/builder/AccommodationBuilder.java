@@ -152,7 +152,11 @@ public abstract class AccommodationBuilder<T extends Accommodation, B extends Ac
             throw new IllegalArgumentException("Distance cannot be negative. Provided: " + distanceKm);
         }
         if (locationLink == null || locationLink.trim().isEmpty()) {
-            locationLink = Accommodation.buildLocationSearchUrl(name, address, nearbyCollege);
+            if (latitude != 0.0 && longitude != 0.0) {
+                locationLink = "https://www.google.com/maps/search/?api=1&query=" + latitude + "," + longitude;
+            } else {
+                locationLink = Accommodation.buildLocationSearchUrl(name, address, nearbyCollege);
+            }
         }
     }
 

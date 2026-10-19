@@ -10,7 +10,7 @@ When replacing a `JTable` inside a `JScrollPane` with an empty state panel:
 When designing UI panels and data queries for evaluation/demo modes:
 - **Role Fallback**: If an active session is in a different role (e.g., student viewing owner portal tabs), resolve owner queries to the demo owner portfolio (e.g., `"owner"`) rather than failing or returning 0 records.
 - **Tab Auto-Refresh**: Add `ChangeListener` to `JTabbedPane` so that switching tabs automatically refreshes underlying tables and badges without requiring a manual refresh click.
-- **Direct Portal Switching**: Provide high-level top-bar controls to seamlessly toggle between Student and Owner views for live demonstration.
+- **Role-Based Portal Access (Strict RBAC)**: Students must never be provided an option to switch to the Owner portal. The Owner portal is strictly reserved for Owner accounts to view and manage their listings and review student enquiries. Portal mode switching controls are only available to Owners (to preview the public Student View) and Admins.
 
 ## 3. Map & External Binary Caches
 - Any tile caches or network caches (such as JXMapViewer2 OSM tiles in `data/cache/`) must be explicitly ignored in `.gitignore` prior to staging git commits to prevent binary repository bloat.

@@ -162,7 +162,13 @@ public class MainFrame extends JFrame implements PanelMediator {
             dialog.setVisible(true);
         });
 
-        switchModeBtn = ModernButton.primary(currentUser.isAdmin() ? "Switch to Admin Portal" : (currentUser.isOwner() ? "Switch to Student Mode" : "Switch to Owner Portal"));
+        // Mode Switcher: Strictly reserved for Owner and Admin roles (Students cannot access Owner/Admin portals)
+        if (currentUser.isAdmin() || currentUser.isOwner()) {
+            switchModeBtn = ModernButton.primary(currentUser.isAdmin() ? "Switch to Admin Portal" : "Switch to Student View");
+            switchModeBtn.setToolTipText(currentUser.isAdmin() ? "Toggle between Admin Portal and Student View" : "Toggle between Owner Management and Student View");
+        } else {
+            switchModeBtn = null;
+        }
 
         JButton logoutBtn = ModernButton.secondary("Logout");
         logoutBtn.addActionListener(e -> handleLogout());
@@ -170,7 +176,9 @@ public class MainFrame extends JFrame implements PanelMediator {
         userControlsPanel.add(userBadge);
         userControlsPanel.add(notificationBellBtn);
         userControlsPanel.add(profileBtn);
-        userControlsPanel.add(switchModeBtn);
+        if (switchModeBtn != null) {
+            userControlsPanel.add(switchModeBtn);
+        }
         userControlsPanel.add(logoutBtn);
         topPanel.add(titleLabel, BorderLayout.WEST);
         topPanel.add(userControlsPanel, BorderLayout.EAST);
@@ -486,21 +494,23 @@ public class MainFrame extends JFrame implements PanelMediator {
         cctvFilterCheck.addActionListener(e -> applyFilters());
         powerFilterCheck.addActionListener(e -> applyFilters());
 
-        switchModeBtn.addActionListener(e -> {
-            if (currentUser.isAdmin()) {
-                if ("ADMIN".equals(activeMode)) {
-                    showMode("STUDENT");
-                } else {
-                    showMode("ADMIN");
+        if (switchModeBtn != null) {
+            switchModeBtn.addActionListener(e -> {
+                if (currentUser.isAdmin()) {
+                    if ("ADMIN".equals(activeMode)) {
+                        showMode("STUDENT");
+                    } else {
+                        showMode("ADMIN");
+                    }
+                } else if (currentUser.isOwner()) {
+                    if ("OWNER".equals(activeMode)) {
+                        showMode("STUDENT");
+                    } else {
+                        showMode("OWNER");
+                    }
                 }
-            } else {
-                if ("OWNER".equals(activeMode)) {
-                    showMode("STUDENT");
-                } else {
-                    showMode("OWNER");
-                }
-            }
-        });
+            });
+        }
 
         // Observer Pattern: Register EventBus Subscribers for Reactive UI Sync
         accommodationEventListener = event -> SwingUtilities.invokeLater(() -> {
@@ -607,17 +617,23 @@ public class MainFrame extends JFrame implements PanelMediator {
     }
 
     private void showMode(String mode) {
+        // Strict RBAC Guard: Students are not authorized to view the Owner or Admin portals
+        if (!"STUDENT".equals(mode) && currentUser.isStudent()) {
+            mode = "STUDENT";
+        }
         activeMode = mode;
         cardLayout.show(mainContainer, mode);
         if ("ADMIN".equals(mode)) {
-            switchModeBtn.setText("Switch to Student View");
+            if (switchModeBtn != null) switchModeBtn.setText("Switch to Student View");
             adminPanel.refreshAllTabs();
         } else if ("OWNER".equals(mode)) {
-            switchModeBtn.setText(currentUser.isOwner() ? "Switch to Student Mode" : "Switch to Student View");
+            if (switchModeBtn != null) switchModeBtn.setText("Switch to Student View");
             ownerPanel.refreshTable();
             ownerPanel.refreshEnquiriesTable();
         } else {
-            switchModeBtn.setText(currentUser.isAdmin() ? "Switch to Admin Portal" : (currentUser.isOwner() ? "Switch to Owner Mode" : "Switch to Owner Portal"));
+            if (switchModeBtn != null) {
+                switchModeBtn.setText(currentUser.isAdmin() ? "Switch to Admin Portal" : "Switch to Owner Portal");
+            }
             applyFilters();
         }
     }

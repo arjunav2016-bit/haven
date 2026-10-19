@@ -40,7 +40,11 @@ public class InMemoryNotificationRepository implements NotificationRepository {
 
     @Override
     public boolean deleteById(String id) {
-        return store.deleteNotification(id);
+        boolean removed = store.deleteNotification(id);
+        if (removed) {
+            HavenEventBus.getInstance().publish(new NotificationEvent(NotificationEvent.Type.CLEARED, null, null));
+        }
+        return removed;
     }
 
     @Override
@@ -78,5 +82,14 @@ public class InMemoryNotificationRepository implements NotificationRepository {
     public void markAllAsRead(String username) {
         store.markAllNotificationsRead(username);
         HavenEventBus.getInstance().publish(new NotificationEvent(NotificationEvent.Type.READ, null, username));
+    }
+
+    @Override
+    public int clearAll(String username) {
+        int count = store.clearNotificationsForUser(username);
+        if (count > 0) {
+            HavenEventBus.getInstance().publish(new NotificationEvent(NotificationEvent.Type.CLEARED, null, username));
+        }
+        return count;
     }
 }

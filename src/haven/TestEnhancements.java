@@ -554,6 +554,12 @@ public class TestEnhancements {
         // 29. Verify Persistent Notifications & NotificationRepository
         System.out.print("[TEST 29] Persistent Notifications & NotificationRepository: ");
         NotificationRepository notifRepo = RepositoryProvider.getNotificationRepository();
+        AtomicBoolean notifClearedFired = new AtomicBoolean(false);
+        HavenEventListener<NotificationEvent> notifListener = e -> {
+            if (e.getType() == NotificationEvent.Type.CLEARED) notifClearedFired.set(true);
+        };
+        bus.subscribe(NotificationEvent.class, notifListener);
+
         Notification testNotif = new Notification("student", "Test Alert", "Your room visit is scheduled.",
                 Notification.Type.SYSTEM, "BH01");
         notifRepo.save(testNotif);
@@ -562,7 +568,25 @@ public class TestEnhancements {
         notifRepo.markAsRead(testNotif.getId());
         Notification fetchedNotif = notifRepo.findById(testNotif.getId()).orElseThrow();
         assert fetchedNotif.isRead() : "Notification should be marked as read";
-        System.out.println("PASSED! (Notifications persisted, counted, and marked read)");
+
+        // Test deleteById
+        boolean deleted = notifRepo.deleteById(testNotif.getId());
+        assert deleted : "deleteById must succeed for existing notification";
+        assert !notifRepo.existsById(testNotif.getId()) : "Notification must no longer exist after deleteById";
+
+        // Test clearAll
+        Notification n1 = new Notification("test_user", "Alert 1", "Msg 1", Notification.Type.SYSTEM, "");
+        Notification n2 = new Notification("test_user", "Alert 2", "Msg 2", Notification.Type.ENQUIRY, "");
+        notifRepo.save(n1);
+        notifRepo.save(n2);
+        assert notifRepo.findByRecipient("test_user").size() == 2 : "Must have 2 notifications for test_user";
+        int clearedCount = notifRepo.clearAll("test_user");
+        assert clearedCount == 2 : "clearAll must return cleared count of 2";
+        assert notifRepo.findByRecipient("test_user").isEmpty() : "test_user inbox must be empty after clearAll";
+        assert notifClearedFired.get() : "NotificationEvent.Type.CLEARED must be published on clearAll/delete";
+        bus.unsubscribe(NotificationEvent.class, notifListener);
+
+        System.out.println("PASSED! (Notifications persisted, marked read, deleted individually, and bulk cleared)");
 
         // 30. Verify Admin Role & Account Governance (Activate / Deactivate)
         System.out.print("[TEST 30] Admin Role & Account Governance (RBAC & Deactivation Guard): ");

@@ -683,4 +683,15 @@ public class InMemoryStore {
         if (removed) persist();
         return removed;
     }
+
+    public synchronized int clearNotificationsForUser(String username) {
+        if (username == null) return 0;
+        List<Notification> userNotifs = getNotificationsForUser(username);
+        int count = userNotifs.size();
+        if (count > 0) {
+            notifications.removeAll(userNotifs);
+            persist();
+        }
+        return count;
+    }
 }

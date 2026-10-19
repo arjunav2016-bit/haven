@@ -150,6 +150,7 @@ public class MainFrame extends JFrame implements PanelMediator {
             dialog.setVisible(true);
         });
         updateNotificationBellBadge();
+        HavenEventBus.getInstance().subscribe(NotificationEvent.class, e -> SwingUtilities.invokeLater(this::updateNotificationBellBadge));
 
         JButton profileBtn = ModernButton.secondary("Profile");
         profileBtn.setToolTipText("View or edit your profile and preferences");

@@ -64,7 +64,11 @@ public class MongoNotificationRepository implements NotificationRepository {
     @Override
     public boolean deleteById(String id) {
         if (id == null) return false;
-        return collection.deleteOne(Filters.eq("id", id.trim())).getDeletedCount() > 0;
+        boolean deleted = collection.deleteOne(Filters.eq("id", id.trim())).getDeletedCount() > 0;
+        if (deleted) {
+            HavenEventBus.getInstance().publish(new NotificationEvent(NotificationEvent.Type.CLEARED, null, null));
+        }
+        return deleted;
     }
 
     @Override
@@ -117,6 +121,16 @@ public class MongoNotificationRepository implements NotificationRepository {
         if (username == null) return;
         collection.updateMany(Filters.eq("recipientUsername", username.trim()), Updates.set("read", true));
         HavenEventBus.getInstance().publish(new NotificationEvent(NotificationEvent.Type.READ, null, username));
+    }
+
+    @Override
+    public int clearAll(String username) {
+        if (username == null || username.trim().isEmpty()) return 0;
+        long count = collection.deleteMany(Filters.eq("recipientUsername", username.trim())).getDeletedCount();
+        if (count > 0) {
+            HavenEventBus.getInstance().publish(new NotificationEvent(NotificationEvent.Type.CLEARED, null, username));
+        }
+        return (int) count;
     }
 
     private Notification mapDocToNotification(Document doc) {

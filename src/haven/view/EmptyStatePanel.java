@@ -43,7 +43,7 @@ public class EmptyStatePanel extends JPanel implements Scrollable {
         card.add(titleLabel);
         card.add(Box.createVerticalStrut(8));
 
-        JLabel subtitleLabel = new JLabel("<html><center style='color:#64748B; font-size:12px;'>" + subtitle + "</center></html>");
+        JLabel subtitleLabel = new JLabel("<html><div style='text-align:center; color:#64748B; font-size:12px; width:340px;'>" + subtitle + "</div></html>");
         subtitleLabel.setFont(HavenTheme.FONT_BODY);
         subtitleLabel.setForeground(HavenTheme.TEXT_SECONDARY);
         subtitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -123,5 +123,11 @@ public class EmptyStatePanel extends JPanel implements Scrollable {
         return new EmptyStatePanel("NO ACTIVE ENQUIRIES", "No Pending Student Enquiries",
                 "All student applications have been addressed or no active enquiries match the current filter.",
                 "Refresh Enquiries", onRefresh);
+    }
+
+    public static EmptyStatePanel forNotifications() {
+        return new EmptyStatePanel("INBOX EMPTY", "No Notifications",
+                "Your activity inbox is completely clear. You'll receive updates when enquiries, messages, or reviews arrive.",
+                null, null);
     }
 }

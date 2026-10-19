@@ -27,7 +27,10 @@ public class NotificationInboxDialog extends JDialog {
     private final Runnable onBadgeChanged;
 
     private final JPanel listContainer;
+    private final JScrollPane scrollPane;
     private final JLabel unreadCountBadge;
+    private final JButton markAllBtn;
+    private final JButton clearAllBtn;
     private final HavenEventListener<NotificationEvent> notifListener;
 
     public NotificationInboxDialog(Window parent, User currentUser, PanelMediator mediator, Runnable onBadgeChanged) {
@@ -37,7 +40,7 @@ public class NotificationInboxDialog extends JDialog {
         this.notificationRepo = RepositoryProvider.getNotificationRepository();
         this.onBadgeChanged = onBadgeChanged;
 
-        setSize(580, 500);
+        setSize(620, 520);
         setLocationRelativeTo(parent);
         setLayout(new BorderLayout());
         getContentPane().setBackground(HavenTheme.BG_CANVAS);
@@ -69,16 +72,22 @@ public class NotificationInboxDialog extends JDialog {
         unreadCountBadge = HavenTheme.createBadge("0 Unread", HavenTheme.PRIMARY, HavenTheme.PRIMARY_LIGHT, HavenTheme.PRIMARY_BORDER);
         headerRight.add(unreadCountBadge);
 
-        JButton markAllBtn = ModernButton.secondary("Mark All Read");
+        markAllBtn = ModernButton.secondary("Mark All Read");
         markAllBtn.setFont(HavenTheme.FONT_CAPTION_BOLD);
+        markAllBtn.setToolTipText("Mark all notifications in your inbox as read");
         markAllBtn.addActionListener(e -> {
-            if (currentUser != null) {
-                notificationRepo.markAllAsRead(currentUser.getUsername());
-                refreshInbox();
-                if (onBadgeChanged != null) onBadgeChanged.run();
-            }
+            String username = (currentUser != null) ? currentUser.getUsername() : "student";
+            notificationRepo.markAllAsRead(username);
+            refreshInbox();
+            if (onBadgeChanged != null) onBadgeChanged.run();
         });
         headerRight.add(markAllBtn);
+
+        clearAllBtn = ModernButton.subtle("Clear All");
+        clearAllBtn.setFont(HavenTheme.FONT_CAPTION_BOLD);
+        clearAllBtn.setToolTipText("Clear all notifications from your inbox");
+        clearAllBtn.addActionListener(e -> handleClearAll());
+        headerRight.add(clearAllBtn);
 
         header.add(headerRight, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
@@ -89,8 +98,10 @@ public class NotificationInboxDialog extends JDialog {
         listContainer.setBackground(HavenTheme.BG_CANVAS);
         listContainer.setBorder(new EmptyBorder(14, 18, 14, 18));
 
-        JScrollPane scrollPane = new JScrollPane(listContainer);
+        scrollPane = new JScrollPane(listContainer);
         scrollPane.setBorder(null);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.getViewport().setBackground(HavenTheme.BG_CANVAS);
         scrollPane.getVerticalScrollBar().setUnitIncrement(14);
         add(scrollPane, BorderLayout.CENTER);
 
@@ -124,24 +135,41 @@ public class NotificationInboxDialog extends JDialog {
             unreadCountBadge.setBackground(HavenTheme.SUCCESS_BG);
         }
 
-        if (list.isEmpty()) {
-            JPanel empty = new JPanel(new BorderLayout());
-            empty.setOpaque(false);
-            empty.setBorder(new EmptyBorder(70, 20, 70, 20));
-            JLabel lbl = new JLabel("Your notification inbox is empty.", SwingConstants.CENTER);
-            lbl.setFont(HavenTheme.FONT_BODY);
-            lbl.setForeground(HavenTheme.TEXT_SECONDARY);
-            empty.add(lbl, BorderLayout.CENTER);
-            listContainer.add(empty);
+        boolean hasItems = !list.isEmpty();
+        markAllBtn.setEnabled(hasItems && unread > 0);
+        clearAllBtn.setEnabled(hasItems);
+
+        if (!hasItems) {
+            scrollPane.setViewportView(EmptyStatePanel.forNotifications());
         } else {
             for (Notification n : list) {
                 listContainer.add(createNotificationCard(n));
                 listContainer.add(Box.createVerticalStrut(8));
             }
+            scrollPane.setViewportView(listContainer);
         }
 
-        listContainer.revalidate();
-        listContainer.repaint();
+        scrollPane.revalidate();
+        scrollPane.repaint();
+    }
+
+    private void handleClearAll() {
+        String username = (currentUser != null) ? currentUser.getUsername() : "student";
+        List<Notification> list = notificationRepo.findByRecipient(username);
+        if (list.isEmpty()) return;
+
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to clear all " + list.size() + " notification" + (list.size() == 1 ? "" : "s") + " from your inbox?",
+                "Clear Notification Inbox",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+        );
+        if (confirm == JOptionPane.YES_OPTION) {
+            notificationRepo.clearAll(username);
+            refreshInbox();
+            if (onBadgeChanged != null) onBadgeChanged.run();
+        }
     }
 
     private JPanel createNotificationCard(Notification n) {
@@ -226,6 +254,16 @@ public class NotificationInboxDialog extends JDialog {
             });
             actions.add(openChatBtn);
         }
+
+        JButton clearBtn = ModernButton.subtle("Clear");
+        clearBtn.setFont(HavenTheme.FONT_BADGE);
+        clearBtn.setToolTipText("Remove this notification from inbox");
+        clearBtn.addActionListener(e -> {
+            notificationRepo.deleteById(n.getId());
+            refreshInbox();
+            if (onBadgeChanged != null) onBadgeChanged.run();
+        });
+        actions.add(clearBtn);
 
         bottomRow.add(actions, BorderLayout.EAST);
 

@@ -39,4 +39,12 @@ public interface NotificationRepository extends Repository<Notification, String>
      * @param username recipient username
      */
     void markAllAsRead(String username);
+
+    /**
+     * Clears (deletes) all notifications for a user.
+     *
+     * @param username recipient username
+     * @return count of deleted notifications
+     */
+    int clearAll(String username);
 }

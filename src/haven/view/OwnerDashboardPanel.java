@@ -165,7 +165,20 @@ public class OwnerDashboardPanel extends JPanel {
         deleteBtn.addActionListener(e -> handleDeleteProperty());
         refreshBtn.addActionListener(e -> refreshTable());
 
+        JButton chatBtn = ModernButton.secondary("Direct Chat");
+        chatBtn.setToolTipText("Open direct message thread with prospective students for this property");
+        chatBtn.addActionListener(e -> {
+            int selectedRow = listingsTable.getSelectedRow();
+            if (selectedRow == -1 || currentListings == null || selectedRow >= currentListings.size()) {
+                JOptionPane.showMessageDialog(this, "Select a property from the table to view direct messages.", "No Selection", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            Accommodation selectedStay = currentListings.get(selectedRow);
+            new ChatDialog(SwingUtilities.getWindowAncestor(this), currentUser, selectedStay).setVisible(true);
+        });
+
         actionPanel.add(refreshBtn);
+        actionPanel.add(chatBtn);
         actionPanel.add(photosBtn);
         actionPanel.add(updateVacancyBtn);
         actionPanel.add(editBtn);

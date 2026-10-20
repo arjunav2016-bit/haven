@@ -89,7 +89,13 @@ public class ChatDialog extends JDialog {
         titleLbl.setFont(HavenTheme.FONT_SUBTITLE);
         titleLbl.setForeground(HavenTheme.TEXT_PRIMARY);
 
-        String subText = "Conversation with @" + this.peerUsername;
+        String roleLabel = "Conversation with @" + this.peerUsername;
+        if (this.currentUser != null && this.currentUser.isOwner()) {
+            roleLabel = "Conversation with Student @" + this.peerUsername;
+        } else if (this.currentUser != null && this.currentUser.isStudent()) {
+            roleLabel = "Conversation with Property Owner (@" + this.peerUsername + ")";
+        }
+        String subText = roleLabel;
         if (!this.enquiryId.isEmpty()) {
             subText += " • Linked Enquiry: " + this.enquiryId;
         } else {
@@ -159,21 +165,35 @@ public class ChatDialog extends JDialog {
 
     private static String resolvePeerForAccommodation(User currentUser, Accommodation acc) {
         if (currentUser != null && currentUser.isOwner()) {
+            if (acc != null && acc.getId() != null) {
+                List<ChatMessage> msgs = RepositoryProvider.getMessageRepository().findConversation(acc.getId(), null, null);
+                for (int i = msgs.size() - 1; i >= 0; i--) {
+                    ChatMessage m = msgs.get(i);
+                    if (!"owner".equalsIgnoreCase(m.getSenderUsername()) && m.getSenderUsername() != null && !m.getSenderUsername().isEmpty()) {
+                        return m.getSenderUsername();
+                    }
+                }
+            }
             return "student";
         }
-        String ownerId = acc.getOwnerId();
-        if (ownerId == null || ownerId.trim().isEmpty() || "OWNER_CURRENT".equalsIgnoreCase(ownerId)) {
-            return "owner";
+        String ownerId = (acc != null) ? acc.getOwnerId() : null;
+        if (ownerId != null && !ownerId.trim().isEmpty() && RepositoryProvider.getUserRepository().userExists(ownerId.trim())) {
+            return ownerId.trim();
         }
-        return ownerId;
+        return "owner";
     }
 
     private static String resolvePeerForEnquiry(User currentUser, Enquiry eq) {
         if (currentUser != null && currentUser.getUsername().equalsIgnoreCase(eq.getStudentUsername())) {
             String ownerId = eq.getOwnerId();
-            return (ownerId == null || ownerId.trim().isEmpty() || "OWNER_CURRENT".equalsIgnoreCase(ownerId)) ? "owner" : ownerId;
+            if (ownerId != null && !ownerId.trim().isEmpty() && RepositoryProvider.getUserRepository().userExists(ownerId.trim())) {
+                return ownerId.trim();
+            }
+            return "owner";
         }
-        return eq.getStudentUsername();
+        return (eq != null && eq.getStudentUsername() != null && !eq.getStudentUsername().isEmpty())
+                ? eq.getStudentUsername()
+                : "student";
     }
 
     private void refreshMessages() {

@@ -133,10 +133,7 @@ public class MongoMessageRepository implements MessageRepository {
                     list.add(m);
                 } else if (isOwnerConversation) {
                     String studentUser = ("owner".equalsIgnoreCase(userA) || "OWNER_CURRENT".equalsIgnoreCase(userA)) ? userB : userA;
-                    boolean aliasMatch = (m.getSenderUsername().equalsIgnoreCase(studentUser)
-                            && ("owner".equalsIgnoreCase(m.getReceiverUsername()) || "OWNER_CURRENT".equalsIgnoreCase(m.getReceiverUsername())))
-                            || (m.getReceiverUsername().equalsIgnoreCase(studentUser)
-                            && ("owner".equalsIgnoreCase(m.getSenderUsername()) || "OWNER_CURRENT".equalsIgnoreCase(m.getSenderUsername())));
+                    boolean aliasMatch = studentUser.equalsIgnoreCase(m.getSenderUsername()) || studentUser.equalsIgnoreCase(m.getReceiverUsername());
                     if (aliasMatch) {
                         list.add(m);
                     }

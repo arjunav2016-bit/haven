@@ -249,7 +249,13 @@ public class NotificationInboxDialog extends JDialog {
                 if (onBadgeChanged != null) onBadgeChanged.run();
                 RepositoryProvider.getAccommodationRepository().findById(n.getLinkedEntityId()).ifPresent(acc -> {
                     dispose();
-                    new ChatDialog(getOwner(), currentUser, acc).setVisible(true);
+                    String replyPeer = "student";
+                    if (n.getTitle() != null && n.getTitle().contains("@")) {
+                        replyPeer = n.getTitle().substring(n.getTitle().indexOf('@') + 1).trim();
+                    } else if (currentUser != null && currentUser.isStudent()) {
+                        replyPeer = "owner";
+                    }
+                    new ChatDialog(getOwner(), currentUser, replyPeer, acc.getId(), acc.getName(), "").setVisible(true);
                 });
             });
             actions.add(openChatBtn);

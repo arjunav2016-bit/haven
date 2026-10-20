@@ -29,19 +29,12 @@ public class ConfirmedState implements EnquiryState {
 
     @Override
     public EnquiryState decline() {
-        return new DeclinedState();
+        throw new IllegalStateException("Cannot decline: Enquiry is already CONFIRMED. A student may only cancel/withdraw.");
     }
 
     @Override
     public EnquiryState cancel() {
         return new CancelledState();
-    }
-
-    @Override
-    public boolean canTransitionTo(String targetStatus) {
-        if (targetStatus == null) return false;
-        String s = targetStatus.trim().toUpperCase();
-        return "CONFIRMED".equals(s) || "DECLINED".equals(s) || "CANCELLED".equals(s);
     }
 
     @Override

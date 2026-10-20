@@ -142,8 +142,14 @@ public class MongoEnquiryRepository implements EnquiryRepository {
             updates.add(Updates.set("ownerResponse", ownerResponse.trim()));
         }
 
-        long matched = collection.updateOne(Filters.eq("enquiryId", enquiryId.trim()), Updates.combine(updates)).getMatchedCount();
-        if (matched > 0) {
+        // Atomic compare-and-swap query: guarantee that the status has not been changed concurrently
+        Bson atomicFilter = Filters.and(
+                Filters.eq("enquiryId", enquiryId.trim()),
+                Filters.eq("status", existing.getStatus())
+        );
+
+        long modified = collection.updateOne(atomicFilter, Updates.combine(updates)).getModifiedCount();
+        if (modified > 0) {
             findById(enquiryId).ifPresent(eq -> {
                 HavenEventBus.getInstance().publish(new EnquiryEvent(EnquiryEvent.Type.STATUS_UPDATED, eq));
                 try {

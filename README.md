@@ -60,7 +60,7 @@ Building HAVEN pushed us well beyond standard textbook examples. Over several we
 ## Core Features by Role
 
 ### For Students (`STUDENT`)
-- **Advanced Multi-Criteria Search & Iterator Filtering**: Filter stays by live keyword search, college proximity, gender eligibility, accommodation type (*Hostel vs PG*), min/max monthly rent, max distance (`km`), minimum star rating (`3★+`, `4★+`), vacancy availability, and multi-select amenities (`WiFi`, `Food / Mess`, `AC`, `Laundry`, `Power Backup`, `CCTV Security`, `Parking`, `Attached Bath`), powered by [`FilteredAccommodationIterator`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/pattern/iterator/FilteredAccommodationIterator.java).
+- **Advanced Multi-Criteria Search & Iterator Filtering**: Filter stays by live keyword search, college proximity, gender eligibility, accommodation type (*Hostel vs PG*), min/max monthly rent, max distance (`km`), minimum star rating (`3★+`, `4★+`), vacancy availability, and multi-select amenities (`WiFi`, `Food / Mess`, `Attached Washroom`, `CCTV Security`, `Power Backup`), powered by [`FilteredAccommodationIterator`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/pattern/iterator/FilteredAccommodationIterator.java).
 - **Interactive Embedded Map View (`JXMapViewer2` + OpenStreetMap)**: Explore verified properties spatially on an interactive OpenStreetMap canvas ([`MapPanel`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/view/MapPanel.java)) with custom price/vacancy pin overlays, click-to-inspect detail drawer, college quick-jump buttons, and external browser fallback.
 - **Property Photo Gallery & Carousel**: View disk-backed property thumbnails directly on [`ListingCardPanel`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/view/ListingCardPanel.java) and open the full [`ImageGalleryDialog`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/view/ImageGalleryDialog.java) carousel (`< Prev` / `Next >`) with captions.
 - **Real-Time In-App Chat with Wardens**: Start pre-booking or enquiry-linked message threads with property owners via [`ChatDialog`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/view/ChatDialog.java), backed by reactive [`ChatEvent`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/pattern/event/ChatEvent.java) delivery.
@@ -312,12 +312,14 @@ c:/Users/minod/OneDrive/Desktop/s3/oop/project/
 ├── VIVA_GUIDE.md                 # Oral examination & viva defense guide
 ├── USER_MANUAL.md                # Role-by-role interactive user manual
 └── src/haven/
-    ├── Main.java                 # Application entry point with SplashScreenWindow
-    ├── TestEnhancements.java     # Automated 30-suite verification runner
+    ├── Main.java                 # Application entry point
+    ├── TestEnhancements.java     # Automated 34-suite verification runner
     ├── model/                    # Domain entities (User, Student, Owner, Admin, Accommodation, Hostel, PG, Enquiry, Review, PropertyImage, ChatMessage, Notification)
+    ├── service/                  # Domain services (AccommodationService, EnquiryService, AuthService, ServiceProvider)
     ├── repository/               # Generic Repository<T,ID>, 7 domain contracts, Abstract Factory, inmemory/ & mongo/ implementations
     ├── pattern/                  # 14 GoF & Enterprise design pattern packages (builder/, state/, command/, report/, decorator/, iterator/, mediator/, event/, adapters)
-    ├── db/                       # DAO Facades, InMemoryStore Singleton, & SeedData
+    ├── db/                       # DAO Facades, InMemoryStore, & SeedData
+    ├── util/                     # SecurityUtils (salted PBKDF2), PropertyImageStorage disk manager
     ├── view/                     # Swing UI views, dialogs, JXMapViewer2 MapPanel, AdminDashboardPanel, HavenTheme, ValidationUtils
     └── exception/                # Checked custom exceptions (AuthenticationException, VacancyExhaustedException)
 ```
@@ -340,9 +342,9 @@ java -Dfile.encoding=UTF-8 -cp "bin;lib/*" haven.Main
 
 ---
 
-## Automated Verification & Testing (30 Suites)
+## Automated Verification & Testing (34 Suites)
 
-Run the 30-test assertion suite validating all OOP principles, 14 design patterns, repositories, image storage, chat events, notifications, and admin governance:
+Run the 34-test assertion suite validating all OOP principles, 14 design patterns, repositories, services, image storage, chat events, notifications, and admin governance:
 
 ```powershell
 java -ea -cp "bin;lib/*" haven.TestEnhancements

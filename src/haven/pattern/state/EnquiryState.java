@@ -63,11 +63,24 @@ public interface EnquiryState {
 
     /**
      * Checks whether a transition to the target status name is valid from this state.
+     * Evaluates transitionTo() to ensure the validation rules and state methods never drift.
      *
      * @param targetStatus target status string
      * @return true if allowed, false otherwise
      */
-    boolean canTransitionTo(String targetStatus);
+    default boolean canTransitionTo(String targetStatus) {
+        if (targetStatus == null) return false;
+        String normalized = targetStatus.trim().toUpperCase();
+        if (normalized.equals(getStatusName())) {
+            return true;
+        }
+        try {
+            transitionTo(normalized);
+            return true;
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return false;
+        }
+    }
 
     /**
      * Transitions to the specified target status name if valid.

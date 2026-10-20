@@ -35,10 +35,7 @@ public class CancelledState implements EnquiryState {
         return this;
     }
 
-    @Override
-    public boolean canTransitionTo(String targetStatus) {
-        return targetStatus != null && "CANCELLED".equalsIgnoreCase(targetStatus.trim());
-    }
+
 
     @Override
     public boolean isTerminal() {

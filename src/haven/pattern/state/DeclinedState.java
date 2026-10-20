@@ -35,10 +35,7 @@ public class DeclinedState implements EnquiryState {
         throw new IllegalStateException("Cannot cancel an enquiry that has already been DECLINED.");
     }
 
-    @Override
-    public boolean canTransitionTo(String targetStatus) {
-        return targetStatus != null && "DECLINED".equalsIgnoreCase(targetStatus.trim());
-    }
+
 
     @Override
     public boolean isTerminal() {

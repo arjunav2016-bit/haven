@@ -35,13 +35,7 @@ public class ContactedState implements EnquiryState {
         return new CancelledState();
     }
 
-    @Override
-    public boolean canTransitionTo(String targetStatus) {
-        if (targetStatus == null) return false;
-        String s = targetStatus.trim().toUpperCase();
-        return "CONTACTED".equals(s) || "CONFIRMED".equals(s)
-                || "DECLINED".equals(s) || "CANCELLED".equals(s);
-    }
+
 
     @Override
     public boolean isTerminal() {

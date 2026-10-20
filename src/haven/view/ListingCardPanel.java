@@ -204,10 +204,18 @@ public class ListingCardPanel extends JPanel {
         catLabel.setForeground(isHostel ? HavenTheme.PRIMARY : new Color(13, 148, 136));
         metaRow.add(catLabel);
 
-        if (accommodation.isFeatured()) {
-            FeaturedAccommodationDecorator decorated = new FeaturedAccommodationDecorator(accommodation, "FEATURED", 0.0);
+        Accommodation effectiveStay = accommodation;
+        FeaturedAccommodationDecorator featuredDecorator = null;
+        if (accommodation instanceof FeaturedAccommodationDecorator) {
+            featuredDecorator = (FeaturedAccommodationDecorator) accommodation;
+        } else if (accommodation.isFeatured()) {
+            featuredDecorator = new FeaturedAccommodationDecorator(accommodation, "FEATURED", 10.0);
+            effectiveStay = featuredDecorator;
+        }
+
+        if (featuredDecorator != null) {
             JLabel featTag = HavenTheme.createBadge(
-                    "★ " + decorated.getHighlightBadgeText(),
+                    featuredDecorator.getHighlightBadgeText(),
                     HavenTheme.WARNING,
                     HavenTheme.WARNING_BG,
                     HavenTheme.WARNING_BORDER
@@ -392,14 +400,20 @@ public class ListingCardPanel extends JPanel {
         actionCol.setPreferredSize(new Dimension(205, 126));
         actionCol.setMinimumSize(new Dimension(205, 126));
 
-        double totalEst = accommodation.calculateTotalMonthlyCost(1);
+        double totalEst = effectiveStay.calculateTotalMonthlyCost(1);
 
         JLabel priceVal = new JLabel(String.format("₹%,.0f", totalEst));
         priceVal.setFont(new Font("SansSerif", Font.BOLD, 22));
         priceVal.setForeground(HavenTheme.PRIMARY);
         priceVal.setAlignmentX(Component.RIGHT_ALIGNMENT);
 
-        JLabel priceSub = new JLabel("/ month (total est.)");
+        JLabel priceSub;
+        if (featuredDecorator != null && featuredDecorator.getDiscountPercentage() > 0) {
+            double origTotal = accommodation.calculateTotalMonthlyCost(1);
+            priceSub = new JLabel(String.format("<html><span style='text-decoration: line-through; color: #94a3b8;'>₹%,.0f</span> / mo (%.0f%% off)</html>", origTotal, featuredDecorator.getDiscountPercentage()));
+        } else {
+            priceSub = new JLabel("/ month (total est.)");
+        }
         priceSub.setFont(HavenTheme.FONT_CAPTION);
         priceSub.setForeground(HavenTheme.TEXT_SECONDARY);
         priceSub.setAlignmentX(Component.RIGHT_ALIGNMENT);

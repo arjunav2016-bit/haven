@@ -194,8 +194,62 @@ public abstract class Accommodation {
     }
 
     public boolean hasAmenity(String amenity) {
-        if (amenities == null || amenity == null) return false;
-        return amenities.stream().anyMatch(a -> a.equalsIgnoreCase(amenity.trim()));
+        if (amenities == null || amenity == null || amenity.trim().isEmpty()) return false;
+        String query = amenity.trim();
+        for (String a : amenities) {
+            if (a == null) continue;
+            String existing = a.trim();
+            if (existing.equalsIgnoreCase(query)) {
+                return true;
+            }
+            if (isAmenityEquivalent(query, existing)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isAmenityEquivalent(String query, String existing) {
+        String q = query.toLowerCase();
+        String e = existing.toLowerCase();
+
+        // Attached Washroom / Attached Bath equivalence
+        if ((q.equals("washroom") || q.equals("attached washroom") || q.equals("attached bath") || q.equals("bath"))
+                && (e.equals("attached washroom") || e.equals("attached bath") || e.equals("washroom") || e.equals("bath"))) {
+            return true;
+        }
+
+        // Food / Mess equivalence
+        if ((q.equals("food") || q.equals("mess") || q.equals("food / mess"))
+                && (e.equals("food / mess") || e.equals("food") || e.equals("mess"))) {
+            return true;
+        }
+
+        // CCTV Security equivalence
+        if ((q.equals("cctv") || q.equals("cctv security"))
+                && (e.equals("cctv security") || e.equals("cctv"))) {
+            return true;
+        }
+
+        // Power Backup equivalence
+        if ((q.equals("power backup") || q.equals("power") || q.equals("backup"))
+                && (e.equals("power backup") || e.equals("power") || e.equals("backup"))) {
+            return true;
+        }
+
+        // WiFi equivalence
+        if ((q.equals("wifi") || q.equals("wi-fi") || q.equals("internet"))
+                && (e.equals("wifi") || e.equals("wi-fi") || e.equals("internet"))) {
+            return true;
+        }
+
+        // AC equivalence: strictly AC or Air Conditioning, NEVER "Power Backup" or "Attached"
+        if ((q.equals("ac") || q.equals("air conditioning") || q.equals("a/c"))
+                && (e.equals("ac") || e.equals("air conditioning") || e.equals("a/c"))) {
+            return true;
+        }
+
+        return false;
     }
 
     public boolean hasAllAmenities(List<String> required) {

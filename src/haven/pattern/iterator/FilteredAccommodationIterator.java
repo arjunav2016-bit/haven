@@ -47,32 +47,35 @@ public class FilteredAccommodationIterator implements Iterator<Accommodation>, I
     }
 
     private boolean matches(Accommodation a) {
-        // 1. Moderation status check
-        if (criteria.isApprovedOnly() && a.isRejected()) {
+        if (a == null) return false;
+
+        // 1. Moderation status check (Properly enforce only APPROVED stays, excluding PENDING, FLAGGED, and REJECTED)
+        if (criteria.isApprovedOnly() && !a.isApproved()) {
             return false;
         }
 
-        // 2. Text search query
-        String q = criteria.getSearchQuery().toLowerCase();
+        // 2. Text search query with null safety
+        String q = (criteria.getSearchQuery() != null) ? criteria.getSearchQuery().trim().toLowerCase() : "";
         if (!q.isEmpty()) {
-            boolean textMatch = a.getName().toLowerCase().contains(q)
+            boolean textMatch = (a.getName() != null && a.getName().toLowerCase().contains(q))
                     || (a.getAddress() != null && a.getAddress().toLowerCase().contains(q))
                     || (a.getNearbyCollege() != null && a.getNearbyCollege().toLowerCase().contains(q));
             if (!textMatch) return false;
         }
 
-        // 3. College filter
+        // 3. College filter with null safety
         String col = criteria.getCollege();
         if (col != null && !col.isEmpty() && !col.equalsIgnoreCase("All") && !col.toLowerCase().startsWith("all")) {
-            if (!a.getNearbyCollege().toLowerCase().contains(col.toLowerCase())) {
+            if (a.getNearbyCollege() == null || !a.getNearbyCollege().toLowerCase().contains(col.toLowerCase())) {
                 return false;
             }
         }
 
-        // 4. Gender filter
+        // 4. Gender filter with null safety
         String gender = criteria.getGender();
         if (gender != null && !gender.isEmpty() && !gender.equalsIgnoreCase("Any")) {
-            if (!a.getGenderAllowed().equalsIgnoreCase(gender) && !a.getGenderAllowed().equalsIgnoreCase("Both")) {
+            if (a.getGenderAllowed() == null
+                    || (!a.getGenderAllowed().equalsIgnoreCase(gender) && !a.getGenderAllowed().equalsIgnoreCase("Both"))) {
                 return false;
             }
         }
@@ -106,7 +109,7 @@ public class FilteredAccommodationIterator implements Iterator<Accommodation>, I
 
         // 9. Wishlist only filter
         if (criteria.isWishlistOnly()) {
-            if (!criteria.getWishlistIds().contains(a.getId())) {
+            if (criteria.getWishlistIds() == null || !criteria.getWishlistIds().contains(a.getId())) {
                 return false;
             }
         }
@@ -119,18 +122,13 @@ public class FilteredAccommodationIterator implements Iterator<Accommodation>, I
             }
         }
 
-        // 11. Required Amenities filter
+        // 11. Required Amenities filter (Delegates to Accommodation.hasAmenity to prevent substring false-positives)
         List<String> reqAmenities = criteria.getRequiredAmenities();
         if (reqAmenities != null && !reqAmenities.isEmpty()) {
             for (String req : reqAmenities) {
-                boolean found = false;
-                for (String am : a.getAmenities()) {
-                    if (am.toLowerCase().contains(req.toLowerCase())) {
-                        found = true;
-                        break;
-                    }
+                if (req != null && !req.trim().isEmpty() && !a.hasAmenity(req)) {
+                    return false;
                 }
-                if (!found) return false;
             }
         }
 
@@ -163,12 +161,12 @@ public class FilteredAccommodationIterator implements Iterator<Accommodation>, I
     }
 
     /**
-     * Returns this iterator instance for use in enhanced for-each loops.
-     * Note: This iterator is single-pass unless {@link #reset()} is explicitly invoked prior to re-iteration.
+     * Returns a fresh iterator instance over the underlying source and filter criteria,
+     * ensuring repeated enhanced for-each loops traverse the matched results reliably.
      */
     @Override
     public Iterator<Accommodation> iterator() {
-        return this;
+        return new FilteredAccommodationIterator(source, criteria, reviewRepository);
     }
 
     /**

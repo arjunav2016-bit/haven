@@ -18,6 +18,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class TestEnhancements {
     public static void main(String[] args) {
+        boolean assertsEnabled = false;
+        assert assertsEnabled = true;
+        if (!assertsEnabled) {
+            System.err.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            System.err.println("ERROR: Java JVM Assertions (-ea) are disabled!");
+            System.err.println("Please run: java -ea -cp \"bin;lib/*\" haven.TestEnhancements");
+            System.err.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            throw new AssertionError("Assertions (-ea flag) must be enabled to run TestEnhancements.");
+        }
+
         System.out.println("=== RUNNING HAVEN ARCHITECTURAL & ENHANCEMENT VERIFICATIONS ===");
 
         // 1. Verify Review Model & Star Calculations
@@ -481,7 +491,22 @@ public class TestEnhancements {
         assert decorated.getHighlightBadgeText().contains("TOP RATED NEAR SCTCE") : "Decorator badge text mismatch";
         assert decorated.isFeatured() : "Decorator should mark accommodation as featured";
         assert decorated.calculateTotalMonthlyCost(1) == Math.round(builtHostel.calculateTotalMonthlyCost(1) * 0.90) : "Decorator 10% promotional discount failed";
-        System.out.println("PASSED! (" + decorated.getHighlightBadgeText() + ")");
+        assert decorated.getBaseRent() == Math.round(builtHostel.getBaseRent() * 0.90) : "Decorator base rent discount failed";
+        assert decorated.getOriginalBaseRent() == builtHostel.getBaseRent() : "Decorator original base rent mismatch";
+
+        // Verify complete delegation to wrapped accommodation (eliminating stale snapshot & uninitialized field bugs)
+        assert decorated.getVacancies() == builtHostel.getVacancies() : "Decorator getVacancies must delegate to wrapped instance";
+        assert decorated.hasAmenity("WiFi") : "Decorator hasAmenity must delegate to wrapped instance";
+        assert decorated.getAmenities().equals(builtHostel.getAmenities()) : "Decorator getAmenities must delegate to wrapped instance";
+        int vacBeforeDec = builtHostel.getVacancies();
+        try {
+            decorated.decrementVacancy();
+            assert builtHostel.getVacancies() == vacBeforeDec - 1 : "decrementVacancy on decorator must mutate the underlying accommodation";
+            builtHostel.setVacancies(vacBeforeDec); // restore
+        } catch (Exception ex) {
+            assert false : "decrementVacancy threw exception: " + ex.getMessage();
+        }
+        System.out.println("PASSED! (" + decorated.getHighlightBadgeText() + " - full delegation verified)");
 
         // 25. Verify Iterator Pattern (FilteredAccommodationIterator)
         System.out.print("[TEST 25] Iterator Pattern (FilteredAccommodationIterator): ");
@@ -500,7 +525,29 @@ public class TestEnhancements {
             assert a.getBaseRent() <= 6000 : "Iterator returned stay exceeding maxRent 6000";
             assert a.getVacancies() > 0 : "Iterator returned stay with 0 vacancies";
         }
-        System.out.println("PASSED! (Matched " + iterResults.size() + " SCTCE hostels via lazy FilteredAccommodationIterator)");
+
+        // Verify multi-pass Iterable support
+        int iterPass1 = 0;
+        for (Accommodation a : filterIterator) iterPass1++;
+        int iterPass2 = 0;
+        for (Accommodation a : filterIterator) iterPass2++;
+        assert iterPass1 > 0 && iterPass1 == iterPass2 : "FilteredAccommodationIterator must support multiple for-each passes via new Iterator";
+
+        // Verify approvedOnly excludes PENDING and FLAGGED stays
+        Hostel flaggedStay = new Hostel("FLG-TEST", "owner", "Pending Stay", "SCTCE", 4000, 1.0, "Boys", 5, 8.4, 76.9, 2000, "10 PM", "Addr", "12345");
+        flaggedStay.setModerationStatus(haven.model.ModerationStatus.FLAGGED);
+        haven.pattern.iterator.AccommodationFilterCriteria approvedCriteria = new haven.pattern.iterator.AccommodationFilterCriteria().setApprovedOnly(true);
+        haven.pattern.iterator.FilteredAccommodationIterator approvedIterator = new haven.pattern.iterator.FilteredAccommodationIterator(List.of(flaggedStay), approvedCriteria);
+        assert !approvedIterator.hasNext() : "setApprovedOnly(true) must exclude FLAGGED stays";
+
+        // Verify canonical amenity matching without substring false positives (e.g. AC matching Power Backup)
+        Hostel powerStay = new Hostel("PWR-TEST", "owner", "Power Stay", "SCTCE", 4000, 1.0, "Boys", 5, 8.4, 76.9, 2000, "10 PM", "Addr", "12345");
+        powerStay.addAmenity("Power Backup");
+        assert !powerStay.hasAmenity("AC") : "hasAmenity('AC') must NOT match 'Power Backup'";
+        assert powerStay.hasAmenity("Power Backup") : "hasAmenity('Power Backup') must match";
+        assert powerStay.hasAmenity("Power") : "hasAmenity('Power') canonical alias must match";
+
+        System.out.println("PASSED! (Matched " + iterResults.size() + " SCTCE hostels, multi-pass & moderation checked)");
 
         // 26. Verify Mediator Pattern (PanelMediator)
         System.out.print("[TEST 26] Mediator Pattern (PanelMediator Cross-View Coordination): ");
@@ -598,9 +645,23 @@ public class TestEnhancements {
             assert false : "Admin authentication failed: " + ex.getMessage();
         }
 
+        // Verify Salted PBKDF2 Cryptography & Pass-the-Hash Elimination
+        String testPlain = "SecureStudentPass!99";
+        String saltHash1 = haven.util.SecurityUtils.hashPassword(testPlain);
+        String saltHash2 = haven.util.SecurityUtils.hashPassword(testPlain);
+        assert !saltHash1.equals(saltHash2) : "PBKDF2 hashes must use distinct random salts and cannot be equal";
+        assert haven.util.SecurityUtils.verifyPassword(testPlain, saltHash1) : "Valid password must verify against PBKDF2 hash";
+        assert !haven.util.SecurityUtils.verifyPassword("wrongpass", saltHash1) : "Wrong password must fail";
+        assert !haven.util.SecurityUtils.verifyPassword(saltHash1, saltHash1) : "Pass-the-hash submission must be strictly rejected";
+
+        // Verify Service Layer instantiation
+        assert haven.service.ServiceProvider.getAccommodationService() != null : "AccommodationService must be initialized";
+        assert haven.service.ServiceProvider.getEnquiryService() != null : "EnquiryService must be initialized";
+        assert haven.service.ServiceProvider.getAuthService() != null : "AuthService must be initialized";
+
         // Reset student password back to pass123 for clean demo logins
         memStore.changePassword("student", "newpass123", "pass123");
-        System.out.println("PASSED! (Admin RBAC verified and demo credentials ready)");
+        System.out.println("PASSED! (Admin RBAC, PBKDF2 salting, Pass-the-Hash guard & Service layer verified)");
 
         // 31. State Pattern Full 5x5 Transition Matrix Validation
         System.out.print("[TEST 31] State Pattern Full Transition Matrix (5 States x 5 Targets): ");
@@ -616,13 +677,13 @@ public class TestEnhancements {
         // Expected canTransitionTo matrix [fromState][toTarget]:
         // PENDING:    P=T, CO=T, CF=T, D=T, CA=T    (open state, allows all)
         // CONTACTED:  P=F, CO=T, CF=T, D=T, CA=T    (no backward to PENDING)
-        // CONFIRMED:  P=F, CO=F, CF=T, D=T, CA=T    (forward + cancel only)
+        // CONFIRMED:  P=F, CO=F, CF=T, D=F, CA=T    (self + cancel only)
         // DECLINED:   P=F, CO=F, CF=F, D=T, CA=F    (terminal, only self)
         // CANCELLED:  P=F, CO=F, CF=F, D=F, CA=T    (terminal, only self)
         boolean[][] expectedMatrix = {
                 {true,  true,  true,  true,  true },  // PENDING
                 {false, true,  true,  true,  true },  // CONTACTED
-                {false, false, true,  true,  true },  // CONFIRMED
+                {false, false, true,  false, true },  // CONFIRMED
                 {false, false, false, true,  false},  // DECLINED
                 {false, false, false, false, true },  // CANCELLED
         };

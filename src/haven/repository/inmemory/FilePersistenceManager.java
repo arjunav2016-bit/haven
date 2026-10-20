@@ -7,6 +7,7 @@ import org.bson.Document;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -196,7 +197,16 @@ public class FilePersistenceManager {
             root.append("notifications", ntfDocs);
 
             String json = root.toJson();
-            Files.writeString(Paths.get(STORE_PATH), json, StandardCharsets.UTF_8);
+            Path targetPath = Paths.get(STORE_PATH);
+            Path tempPath = Paths.get(DATA_DIR, "haven_store.tmp");
+            Files.writeString(tempPath, json, StandardCharsets.UTF_8,
+                    java.nio.file.StandardOpenOption.CREATE,
+                    java.nio.file.StandardOpenOption.TRUNCATE_EXISTING);
+            try {
+                Files.move(tempPath, targetPath, java.nio.file.StandardCopyOption.ATOMIC_MOVE, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            } catch (java.nio.file.AtomicMoveNotSupportedException ex) {
+                Files.move(tempPath, targetPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
         } catch (Exception e) {
             System.err.println("[FilePersistenceManager] Error saving state to " + STORE_PATH + ": " + e.getMessage());
         }

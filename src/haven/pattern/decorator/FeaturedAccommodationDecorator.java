@@ -22,6 +22,19 @@ public class FeaturedAccommodationDecorator extends AccommodationDecorator {
     }
 
     @Override
+    public double getBaseRent() {
+        double rawRent = wrapped.getBaseRent();
+        if (discountPercentage > 0.0) {
+            return Math.round(rawRent * (1.0 - (discountPercentage / 100.0)));
+        }
+        return rawRent;
+    }
+
+    public double getOriginalBaseRent() {
+        return wrapped.getBaseRent();
+    }
+
+    @Override
     public double calculateTotalMonthlyCost(int sharingRooms) {
         double rawCost = wrapped.calculateTotalMonthlyCost(sharingRooms);
         if (discountPercentage > 0.0) {

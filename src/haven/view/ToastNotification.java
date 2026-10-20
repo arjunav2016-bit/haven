@@ -7,8 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * Modern floating Toast / Banner notification for instant user feedback.
- * Styled with HavenTheme semantic colors and typography (No Emojis).
+ * Floating Toast notification banner for user feedback.
+ * Styled with HavenTheme semantic colors and typography.
  */
 public class ToastNotification extends JPanel {
 
@@ -77,7 +77,7 @@ public class ToastNotification extends JPanel {
 
         Dimension toastSize = toast.getPreferredSize();
         int x = (frame.getWidth() - toastSize.width) / 2;
-        int y = frame.getHeight() - toastSize.height - 65; // Positioned near bottom
+        int y = 72; // Float cleanly beneath top navigation header, preventing collision with bottom docks
 
         toast.setBounds(x, y, toastSize.width, toastSize.height);
         layeredPane.add(toast, JLayeredPane.POPUP_LAYER);

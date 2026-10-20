@@ -24,12 +24,8 @@ import java.util.stream.Collectors;
 
 /**
  * Main application window for HAVEN.
- * Follows Dependency Inversion Principle by depending on Repository interfaces,
- * Observer Pattern via HavenEventBus for reactive synchronization,
- * Iterator Pattern via FilteredAccommodationIterator for advanced multi-criteria search,
- * and Mediator Pattern via PanelMediator for decoupled cross-panel navigation.
- *
- * Styled cleanly with HavenTheme design system (No Emojis).
+ * Integrates the discovery view, map panel, enquiries, and dashboard.
+ * Uses PanelMediator for panel switching and HavenEventBus for live updates.
  */
 public class MainFrame extends JFrame implements PanelMediator {
     private final AccommodationRepository accommodationRepo;
@@ -94,7 +90,7 @@ public class MainFrame extends JFrame implements PanelMediator {
 
     public MainFrame(User currentUser, AccommodationRepository accommodationRepo, UserRepository userRepo,
                      EnquiryRepository enquiryRepo, ReviewRepository reviewRepo) {
-        super("HAVEN - Student Accommodation Discovery & Governance Platform");
+        super("HAVEN - Student Accommodation Discovery");
         this.currentUser = currentUser;
         this.accommodationRepo = accommodationRepo;
         this.userRepo = userRepo;
@@ -113,15 +109,30 @@ public class MainFrame extends JFrame implements PanelMediator {
         // HEADER BAR WITH NOTIFICATION BELL, PROFILE & ROLE MODE SWITCHER
         // =====================================================================
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBackground(HavenTheme.BG_CANVAS);
+        topPanel.setBackground(HavenTheme.SURFACE_WHITE);
         topPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 1, 0, HavenTheme.BORDER_LIGHT),
-                new EmptyBorder(12, 20, 12, 20)
+                new EmptyBorder(12, 24, 12, 24)
         ));
 
-        JLabel titleLabel = new JLabel("HAVEN : Student Accommodation Discovery");
-        titleLabel.setFont(HavenTheme.FONT_TITLE);
-        titleLabel.setForeground(HavenTheme.TEXT_PRIMARY);
+        JPanel brandPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        brandPanel.setOpaque(false);
+
+        JLabel brandLogo = new JLabel("HAVEN");
+        brandLogo.setFont(new Font("SansSerif", Font.BOLD, 19));
+        brandLogo.setForeground(HavenTheme.PRIMARY);
+
+        JLabel brandSep = new JLabel("│");
+        brandSep.setFont(new Font("SansSerif", Font.PLAIN, 15));
+        brandSep.setForeground(HavenTheme.BORDER_SUBTLE);
+
+        JLabel titleLabel = new JLabel("Student Accommodation Discovery");
+        titleLabel.setFont(HavenTheme.FONT_SUBTITLE);
+        titleLabel.setForeground(HavenTheme.TEXT_SECONDARY);
+
+        brandPanel.add(brandLogo);
+        brandPanel.add(brandSep);
+        brandPanel.add(titleLabel);
 
         JPanel userControlsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         userControlsPanel.setOpaque(false);
@@ -180,7 +191,7 @@ public class MainFrame extends JFrame implements PanelMediator {
             userControlsPanel.add(switchModeBtn);
         }
         userControlsPanel.add(logoutBtn);
-        topPanel.add(titleLabel, BorderLayout.WEST);
+        topPanel.add(brandPanel, BorderLayout.WEST);
         topPanel.add(userControlsPanel, BorderLayout.EAST);
         add(topPanel, BorderLayout.NORTH);
 
@@ -189,42 +200,54 @@ public class MainFrame extends JFrame implements PanelMediator {
         mainContainer = new JPanel(cardLayout);
 
         // =====================================================================
-        // STUDENT VIEW WITH 3-TIER ADVANCED SEARCH FILTER BAR
+        // STUDENT VIEW WITH MODERN DISCOVERY TOOLBAR & ADVANCED FILTERS
         // =====================================================================
         JPanel studentViewPanel = new JPanel(new BorderLayout());
         JPanel filterPanel = new JPanel();
         filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.Y_AXIS));
-        filterPanel.setBackground(HavenTheme.BG_MUTED);
+        filterPanel.setBackground(HavenTheme.SURFACE_WHITE);
         filterPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 1, 0, HavenTheme.BORDER_LIGHT),
-                new EmptyBorder(8, 16, 8, 16)
+                new EmptyBorder(12, 24, 12, 24)
         ));
 
-        // Tier 1: Search, College, Type, Gender, Price Range (Min - Max), Sort & Live Count Badge
-        JPanel primaryRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 3));
+        // Tier 1: Search, College, Type, Rent Range, Sort & Live Count Label
+        JPanel primaryRow = new JPanel(new BorderLayout(14, 0));
         primaryRow.setOpaque(false);
 
-        JLabel searchLbl = new JLabel("Search:");
-        searchLbl.setFont(HavenTheme.FONT_CAPTION_BOLD);
-        searchLbl.setForeground(HavenTheme.TEXT_BODY);
-        primaryRow.add(searchLbl);
+        JPanel primaryLeft = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        primaryLeft.setOpaque(false);
 
-        searchField = new JTextField("", 12);
+        searchField = new JTextField("", 14) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (getText().isEmpty() && !hasFocus()) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                    g2.setColor(HavenTheme.TEXT_MUTED);
+                    g2.setFont(HavenTheme.FONT_BODY);
+                    Insets insets = getInsets();
+                    FontMetrics fm = g2.getFontMetrics();
+                    g2.drawString("🔍 Search stays, area...", insets.left + 2, (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
+                    g2.dispose();
+                }
+            }
+        };
         searchField.setFont(HavenTheme.FONT_BODY);
-        searchField.setPreferredSize(new Dimension(135, 30));
+        searchField.setPreferredSize(new Dimension(215, 32));
         searchField.setBorder(HavenTheme.createInputPadding());
-        searchField.setToolTipText("Search by property name, road, or area (e.g. Pappanamcode, Sreekaryam)");
-        primaryRow.add(searchField);
-
-        JLabel collegeLbl = new JLabel("College:");
-        collegeLbl.setFont(HavenTheme.FONT_CAPTION_BOLD);
-        collegeLbl.setForeground(HavenTheme.TEXT_BODY);
-        primaryRow.add(collegeLbl);
+        searchField.setToolTipText("Search stays by property name, area, or road (e.g. Pappanamcode, SCTCE)");
+        searchField.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override public void focusGained(java.awt.event.FocusEvent e) { searchField.repaint(); }
+            @Override public void focusLost(java.awt.event.FocusEvent e) { searchField.repaint(); }
+        });
+        primaryLeft.add(searchField);
 
         String[] collegeOptions = {"All Colleges", "SCTCE", "CET", "GEC Barton Hill", "Mar Baselios (MBCET)", "LBS Institute"};
         collegeBox = new JComboBox<>(collegeOptions);
         collegeBox.setFont(HavenTheme.FONT_BODY);
-        collegeBox.setPreferredSize(new Dimension(145, 30));
+        collegeBox.setPreferredSize(new Dimension(145, 32));
         if (currentUser instanceof Student) {
             String studentCol = ((Student) currentUser).getCollegeName();
             if (studentCol != null) {
@@ -236,67 +259,38 @@ public class MainFrame extends JFrame implements PanelMediator {
                 }
             }
         }
-        primaryRow.add(collegeBox);
-
-        JLabel typeLbl = new JLabel("Type:");
-        typeLbl.setFont(HavenTheme.FONT_CAPTION_BOLD);
-        typeLbl.setForeground(HavenTheme.TEXT_BODY);
-        primaryRow.add(typeLbl);
+        primaryLeft.add(collegeBox);
 
         typeFilterBox = new JComboBox<>(new String[]{"All Types", "Hostel", "PG"});
         typeFilterBox.setFont(HavenTheme.FONT_BODY);
-        typeFilterBox.setPreferredSize(new Dimension(95, 30));
-        primaryRow.add(typeFilterBox);
+        typeFilterBox.setPreferredSize(new Dimension(100, 32));
+        primaryLeft.add(typeFilterBox);
 
-        JLabel genderLbl = new JLabel("Gender:");
-        genderLbl.setFont(HavenTheme.FONT_CAPTION_BOLD);
-        genderLbl.setForeground(HavenTheme.TEXT_BODY);
-        primaryRow.add(genderLbl);
-
-        genderBox = new JComboBox<>(new String[]{"Any", "Boys", "Girls"});
-        genderBox.setFont(HavenTheme.FONT_BODY);
-        genderBox.setPreferredSize(new Dimension(78, 30));
-        primaryRow.add(genderBox);
-
-        JLabel rentLbl = new JLabel("Rent (₹):");
+        JPanel rentGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        rentGroup.setOpaque(false);
+        JLabel rentLbl = new JLabel("Rent:");
         rentLbl.setFont(HavenTheme.FONT_CAPTION_BOLD);
-        rentLbl.setForeground(HavenTheme.TEXT_BODY);
-        primaryRow.add(rentLbl);
+        rentLbl.setForeground(HavenTheme.TEXT_SECONDARY);
+        rentGroup.add(rentLbl);
 
         minRentField = new JTextField("", 4);
         minRentField.setFont(HavenTheme.FONT_BODY);
-        minRentField.setPreferredSize(new Dimension(56, 30));
+        minRentField.setPreferredSize(new Dimension(54, 32));
         minRentField.setBorder(HavenTheme.createInputPadding());
-        minRentField.setToolTipText("Minimum Monthly Rent (₹)");
-        primaryRow.add(minRentField);
+        minRentField.setToolTipText("Min Monthly Rent (₹)");
+        rentGroup.add(minRentField);
 
-        primaryRow.add(new JLabel("-"));
+        JLabel rentDash = new JLabel("–");
+        rentDash.setForeground(HavenTheme.TEXT_MUTED);
+        rentGroup.add(rentDash);
 
         rentField = new JTextField("8000", 5);
         rentField.setFont(HavenTheme.FONT_BODY);
-        rentField.setPreferredSize(new Dimension(64, 30));
+        rentField.setPreferredSize(new Dimension(62, 32));
         rentField.setBorder(HavenTheme.createInputPadding());
-        rentField.setToolTipText("Maximum Monthly Rent (₹)");
-        primaryRow.add(rentField);
-
-        resultsCountLabel = HavenTheme.createBadge(
-                "Showing all stays",
-                HavenTheme.PRIMARY,
-                HavenTheme.PRIMARY_LIGHT,
-                HavenTheme.PRIMARY_BORDER
-        );
-        primaryRow.add(resultsCountLabel);
-
-        filterPanel.add(primaryRow);
-
-        // Tier 2: Sort By, Distance Filter, Min Rating Filter, Vacancies Toggle, Amenities Toggles, and Reset
-        JPanel tier2Row = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 3));
-        tier2Row.setOpaque(false);
-
-        JLabel sortLbl = new JLabel("Sort By:");
-        sortLbl.setFont(HavenTheme.FONT_CAPTION_BOLD);
-        sortLbl.setForeground(HavenTheme.TEXT_PRIMARY);
-        tier2Row.add(sortLbl);
+        rentField.setToolTipText("Max Monthly Rent (₹)");
+        rentGroup.add(rentField);
+        primaryLeft.add(rentGroup);
 
         sortBox = new JComboBox<>(new String[]{
                 "Default (Featured First)",
@@ -306,93 +300,115 @@ public class MainFrame extends JFrame implements PanelMediator {
                 "Vacancies: High to Low"
         });
         sortBox.setFont(HavenTheme.FONT_BODY);
-        sortBox.setPreferredSize(new Dimension(175, 28));
-        tier2Row.add(sortBox);
+        sortBox.setPreferredSize(new Dimension(165, 32));
+        primaryLeft.add(sortBox);
 
-        tier2Row.add(Box.createHorizontalStrut(6));
+        primaryRow.add(primaryLeft, BorderLayout.WEST);
 
-        JLabel distLbl = new JLabel("Distance:");
-        distLbl.setFont(HavenTheme.FONT_CAPTION_BOLD);
-        distLbl.setForeground(HavenTheme.TEXT_BODY);
-        tier2Row.add(distLbl);
+        resultsCountLabel = new JLabel("Showing all stays");
+        resultsCountLabel.setFont(HavenTheme.FONT_BODY_BOLD);
+        resultsCountLabel.setForeground(HavenTheme.TEXT_SECONDARY);
+        primaryRow.add(resultsCountLabel, BorderLayout.EAST);
+
+        filterPanel.add(primaryRow);
+
+        // Tier 2: Refinement strip (Gender, Distance, Rating, Availability, Saved, Amenities, Reset)
+        JPanel tier2Row = new JPanel(new BorderLayout(10, 0));
+        tier2Row.setOpaque(false);
+        tier2Row.setBorder(new EmptyBorder(10, 0, 0, 0));
+
+        JPanel tier2Left = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        tier2Left.setOpaque(false);
+
+        JLabel filtersLbl = new JLabel("Filters:");
+        filtersLbl.setFont(HavenTheme.FONT_CAPTION_BOLD);
+        filtersLbl.setForeground(HavenTheme.TEXT_SECONDARY);
+        tier2Left.add(filtersLbl);
+
+        genderBox = new JComboBox<>(new String[]{"Gender: Any", "Gender: Boys", "Gender: Girls"});
+        genderBox.setFont(HavenTheme.FONT_CAPTION);
+        genderBox.setPreferredSize(new Dimension(108, 26));
+        tier2Left.add(genderBox);
 
         maxDistanceBox = new JComboBox<>(new String[]{"Any Distance", "<= 0.5 km", "<= 1.0 km", "<= 2.0 km"});
         maxDistanceBox.setFont(HavenTheme.FONT_CAPTION);
         maxDistanceBox.setPreferredSize(new Dimension(108, 26));
-        tier2Row.add(maxDistanceBox);
-
-        JLabel ratingLbl = new JLabel("Min Rating:");
-        ratingLbl.setFont(HavenTheme.FONT_CAPTION_BOLD);
-        ratingLbl.setForeground(HavenTheme.TEXT_BODY);
-        tier2Row.add(ratingLbl);
+        tier2Left.add(maxDistanceBox);
 
         minRatingBox = new JComboBox<>(new String[]{"Any Rating", "★ 4.0+", "★ 4.5+"});
         minRatingBox.setFont(HavenTheme.FONT_CAPTION);
         minRatingBox.setPreferredSize(new Dimension(95, 26));
-        tier2Row.add(minRatingBox);
+        tier2Left.add(minRatingBox);
 
-        vacanciesOnlyCheck = new JCheckBox("Has Vacancies");
+        JLabel sep1 = new JLabel("│");
+        sep1.setForeground(HavenTheme.BORDER_SUBTLE);
+        tier2Left.add(sep1);
+
+        vacanciesOnlyCheck = new JCheckBox("Available Only");
         vacanciesOnlyCheck.setFont(HavenTheme.FONT_CAPTION_BOLD);
         vacanciesOnlyCheck.setForeground(HavenTheme.SUCCESS);
         vacanciesOnlyCheck.setOpaque(false);
-        tier2Row.add(vacanciesOnlyCheck);
+        tier2Left.add(vacanciesOnlyCheck);
 
-        tier2Row.add(Box.createHorizontalStrut(6));
+        wishlistFilterCheck = new JCheckBox("Saved Only");
+        wishlistFilterCheck.setFont(HavenTheme.FONT_CAPTION_BOLD);
+        wishlistFilterCheck.setForeground(new Color(217, 119, 6));
+        wishlistFilterCheck.setOpaque(false);
+        tier2Left.add(wishlistFilterCheck);
+
+        JLabel sep2 = new JLabel("│");
+        sep2.setForeground(HavenTheme.BORDER_SUBTLE);
+        tier2Left.add(sep2);
 
         JLabel amenityLabel = new JLabel("Amenities:");
         amenityLabel.setFont(HavenTheme.FONT_CAPTION_BOLD);
-        amenityLabel.setForeground(HavenTheme.TEXT_BODY);
-        tier2Row.add(amenityLabel);
+        amenityLabel.setForeground(HavenTheme.TEXT_SECONDARY);
+        tier2Left.add(amenityLabel);
 
         wifiFilterCheck = new JCheckBox("WiFi");
         wifiFilterCheck.setFont(HavenTheme.FONT_CAPTION);
         wifiFilterCheck.setForeground(HavenTheme.TEXT_BODY);
         wifiFilterCheck.setOpaque(false);
-        tier2Row.add(wifiFilterCheck);
+        tier2Left.add(wifiFilterCheck);
 
-        foodFilterCheck = new JCheckBox("Food/Mess");
+        foodFilterCheck = new JCheckBox("Food / Mess");
         foodFilterCheck.setFont(HavenTheme.FONT_CAPTION);
         foodFilterCheck.setForeground(HavenTheme.TEXT_BODY);
         foodFilterCheck.setOpaque(false);
-        tier2Row.add(foodFilterCheck);
+        tier2Left.add(foodFilterCheck);
 
         bathFilterCheck = new JCheckBox("Attached Bath");
         bathFilterCheck.setFont(HavenTheme.FONT_CAPTION);
         bathFilterCheck.setForeground(HavenTheme.TEXT_BODY);
         bathFilterCheck.setOpaque(false);
-        tier2Row.add(bathFilterCheck);
+        tier2Left.add(bathFilterCheck);
 
         cctvFilterCheck = new JCheckBox("CCTV");
         cctvFilterCheck.setFont(HavenTheme.FONT_CAPTION);
         cctvFilterCheck.setForeground(HavenTheme.TEXT_BODY);
         cctvFilterCheck.setOpaque(false);
-        tier2Row.add(cctvFilterCheck);
+        tier2Left.add(cctvFilterCheck);
 
         powerFilterCheck = new JCheckBox("Power Backup");
         powerFilterCheck.setFont(HavenTheme.FONT_CAPTION);
         powerFilterCheck.setForeground(HavenTheme.TEXT_BODY);
         powerFilterCheck.setOpaque(false);
-        tier2Row.add(powerFilterCheck);
+        tier2Left.add(powerFilterCheck);
 
-        wishlistFilterCheck = new JCheckBox("Saved Only");
-        wishlistFilterCheck.setFont(HavenTheme.FONT_CAPTION_BOLD);
-        wishlistFilterCheck.setForeground(HavenTheme.WARNING);
-        wishlistFilterCheck.setOpaque(false);
-        tier2Row.add(wishlistFilterCheck);
+        tier2Row.add(tier2Left, BorderLayout.WEST);
 
-        JButton clearFiltersBtn = ModernButton.danger("Clear All");
+        JButton clearFiltersBtn = ModernButton.subtle("Reset Filters");
         clearFiltersBtn.setFont(HavenTheme.FONT_CAPTION_BOLD);
+        clearFiltersBtn.setPreferredSize(new Dimension(108, 26));
         clearFiltersBtn.addActionListener(e -> resetAllFilters());
-
-        tier2Row.add(Box.createHorizontalStrut(4));
-        tier2Row.add(clearFiltersBtn);
+        tier2Row.add(clearFiltersBtn, BorderLayout.EAST);
 
         filterPanel.add(tier2Row);
         studentViewPanel.add(filterPanel, BorderLayout.NORTH);
 
         cardsContainer = new JPanel();
         cardsContainer.setLayout(new BoxLayout(cardsContainer, BoxLayout.Y_AXIS));
-        cardsContainer.setBorder(new EmptyBorder(12, 18, 12, 18));
+        cardsContainer.setBorder(new EmptyBorder(16, 24, 76, 24));
         cardsContainer.setBackground(HavenTheme.BG_CANVAS);
 
         JScrollPane scrollPane = new JScrollPane(cardsContainer);
@@ -400,10 +416,13 @@ public class MainFrame extends JFrame implements PanelMediator {
         scrollPane.setBorder(null);
         studentViewPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Comparison Dock (Bottom Bar)
-        comparisonDock = new JPanel(new BorderLayout(12, 0));
+        // Comparison Dock (Bottom Bar) - Sleek elevated toolbar with subtle top divider
+        comparisonDock = new JPanel(new BorderLayout(16, 0));
         comparisonDock.setBackground(HavenTheme.SURFACE_DARK);
-        comparisonDock.setBorder(new EmptyBorder(10, 20, 10, 20));
+        comparisonDock.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(51, 65, 85)),
+                new EmptyBorder(12, 24, 12, 24)
+        ));
         comparisonDock.setVisible(false);
 
         comparisonLabel = new JLabel("0 of 3 stays selected for comparison");
@@ -724,7 +743,12 @@ public class MainFrame extends JFrame implements PanelMediator {
         else if (college.contains("CET")) college = "CET";
         else if (college.contains("SCTCE")) college = "SCTCE";
 
-        String gender = (String) genderBox.getSelectedItem();
+        String genderChoice = (String) genderBox.getSelectedItem();
+        String gender = "Any";
+        if (genderChoice != null) {
+            if (genderChoice.contains("Boys")) gender = "Boys";
+            else if (genderChoice.contains("Girls")) gender = "Girls";
+        }
         String typeChoice = (String) typeFilterBox.getSelectedItem();
         String accType = "ALL";
         if ("Hostel".equalsIgnoreCase(typeChoice)) accType = "HOSTEL";
@@ -833,7 +857,7 @@ public class MainFrame extends JFrame implements PanelMediator {
                         this::handleToggleCompare,
                         this::showMapView
                 ));
-                cardsContainer.add(Box.createRigidArea(new Dimension(0, 10)));
+                cardsContainer.add(Box.createRigidArea(new Dimension(0, 14)));
             }
         }
         cardsContainer.revalidate();
@@ -868,8 +892,13 @@ public class MainFrame extends JFrame implements PanelMediator {
                     comparedStays.values().stream().map(Accommodation::getName).collect(Collectors.joining(", ")) + ")");
             compareNowBtn.setEnabled(count >= 2);
         }
-        comparisonDock.revalidate();
-        comparisonDock.repaint();
+        if (comparisonDock.getParent() != null) {
+            comparisonDock.getParent().revalidate();
+            comparisonDock.getParent().repaint();
+        } else {
+            comparisonDock.revalidate();
+            comparisonDock.repaint();
+        }
     }
 
     private HostelDAO getHostelDAO() {

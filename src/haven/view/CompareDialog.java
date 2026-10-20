@@ -173,7 +173,7 @@ public class CompareDialog extends JDialog {
         column.add(new JSeparator());
         column.add(Box.createVerticalStrut(8));
 
-        // 3. Amenities Check (Clean text indicators, no emojis)
+        // 3. Amenities comparison list
         JLabel amenitiesHeader = new JLabel("Amenities Included:");
         amenitiesHeader.setFont(HavenTheme.FONT_BODY_BOLD);
         amenitiesHeader.setForeground(HavenTheme.TEXT_PRIMARY);

@@ -20,7 +20,15 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * MongoDB concrete implementation of MessageRepository.
+ * MongoMessageRepository.java
+ * CST 205 OOP Lab Project - MongoDB Data Access for Chat Messaging
+ *
+ * Handles persistent message storage in MongoDB collection 'messages'.
+ * Features:
+ * - Thread retrieval sorted chronologically by timestamp
+ * - Conversation resolution between student & property warden/owner
+ * - Fires ChatEvent on HavenEventBus so open chat windows update in real-time
+ * - Creates a Notification record so recipient sees unread badge count
  */
 public class MongoMessageRepository implements MessageRepository {
     private final MongoCollection<Document> collection;
@@ -120,6 +128,8 @@ public class MongoMessageRepository implements MessageRepository {
             filters.add(Filters.eq("accommodationId", accommodationId.trim()));
         }
 
+        // Resolve conversations between student and property owner.
+        // Handles case where owner is logged in as "owner" or registered specific ownerId
         boolean isOwnerConversation = "owner".equalsIgnoreCase(userA) || "owner".equalsIgnoreCase(userB)
                 || "OWNER_CURRENT".equalsIgnoreCase(userA) || "OWNER_CURRENT".equalsIgnoreCase(userB);
 

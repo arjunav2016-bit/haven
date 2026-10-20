@@ -11,52 +11,52 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 
 /**
- * HavenTheme - Central Design System and Aesthetic Standard for HAVEN.
- * Encapsulates the Modern Indigo & Slate color palette, typography hierarchy,
- * card elevation styles, and enterprise data table styling.
- * 
- * Adheres strictly to clean, academic/enterprise desktop standards (No Emojis).
+ * HavenTheme - UI styling constants for HAVEN.
+ * Sets the color palette, fonts, borders, and table renderers across all Swing panels.
  */
 public final class HavenTheme {
     private HavenTheme() {}
 
-    // --- Color Palette: Modern Indigo & Slate ---
-    public static final Color PRIMARY = new Color(79, 70, 229);        // Indigo 600
-    public static final Color PRIMARY_HOVER = new Color(67, 56, 202);  // Indigo 700
-    public static final Color PRIMARY_PRESSED = new Color(55, 48, 163);// Indigo 800
-    public static final Color PRIMARY_LIGHT = new Color(238, 242, 255);// Indigo 50
-    public static final Color PRIMARY_BORDER = new Color(199, 210, 254);// Indigo 200
+    // Primary Brand Colors (Indigo accents)
+    public static final Color PRIMARY = new Color(79, 70, 229);
+    public static final Color PRIMARY_HOVER = new Color(67, 56, 202);
+    public static final Color PRIMARY_PRESSED = new Color(55, 48, 163);
+    public static final Color PRIMARY_LIGHT = new Color(238, 242, 255);
+    public static final Color PRIMARY_BORDER = new Color(199, 210, 254);
 
-    public static final Color BG_CANVAS = new Color(248, 250, 252);    // Slate 50
-    public static final Color BG_MUTED = new Color(241, 245, 249);     // Slate 100
+    // Background & Surface
+    public static final Color BG_CANVAS = new Color(248, 250, 252);
+    public static final Color BG_MUTED = new Color(241, 245, 249);
     public static final Color SURFACE_WHITE = Color.WHITE;
-    public static final Color SURFACE_DARK = new Color(15, 23, 42);    // Slate 900
+    public static final Color SURFACE_DARK = new Color(15, 23, 42);
 
-    public static final Color BORDER_LIGHT = new Color(226, 232, 240); // Slate 200
-    public static final Color BORDER_SUBTLE = new Color(203, 213, 225);// Slate 300
-    public static final Color BORDER_FOCUS = new Color(99, 102, 241);  // Indigo 500
+    // Borders & Dividers
+    public static final Color BORDER_LIGHT = new Color(226, 232, 240);
+    public static final Color BORDER_SUBTLE = new Color(203, 213, 225);
+    public static final Color BORDER_FOCUS = new Color(99, 102, 241);
 
-    public static final Color TEXT_PRIMARY = new Color(15, 23, 42);    // Slate 900
-    public static final Color TEXT_BODY = new Color(51, 65, 85);       // Slate 700
-    public static final Color TEXT_SECONDARY = new Color(100, 116, 139);// Slate 500
-    public static final Color TEXT_MUTED = new Color(148, 163, 184);   // Slate 400
+    // Text hierarchy
+    public static final Color TEXT_PRIMARY = new Color(15, 23, 42);
+    public static final Color TEXT_BODY = new Color(51, 65, 85);
+    public static final Color TEXT_SECONDARY = new Color(100, 116, 139);
+    public static final Color TEXT_MUTED = new Color(148, 163, 184);
 
-    // Semantic Accents
-    public static final Color SUCCESS = new Color(5, 150, 105);        // Emerald 600
-    public static final Color SUCCESS_BG = new Color(236, 253, 245);   // Emerald 50
-    public static final Color SUCCESS_BORDER = new Color(167, 243, 208);// Emerald 200
+    // Status / Alert indicators
+    public static final Color SUCCESS = new Color(5, 150, 105);
+    public static final Color SUCCESS_BG = new Color(236, 253, 245);
+    public static final Color SUCCESS_BORDER = new Color(167, 243, 208);
 
-    public static final Color WARNING = new Color(217, 119, 6);        // Amber 600
-    public static final Color WARNING_BG = new Color(254, 252, 232);   // Amber 50
-    public static final Color WARNING_BORDER = new Color(253, 230, 138);// Amber 200
+    public static final Color WARNING = new Color(217, 119, 6);
+    public static final Color WARNING_BG = new Color(254, 252, 232);
+    public static final Color WARNING_BORDER = new Color(253, 230, 138);
 
-    public static final Color DANGER = new Color(220, 38, 38);         // Rose 600
-    public static final Color DANGER_BG = new Color(254, 242, 242);    // Rose 50
-    public static final Color DANGER_BORDER = new Color(254, 202, 202); // Rose 200
+    public static final Color DANGER = new Color(220, 38, 38);
+    public static final Color DANGER_BG = new Color(254, 242, 242);
+    public static final Color DANGER_BORDER = new Color(254, 202, 202);
 
-    public static final Color INFO = new Color(37, 99, 235);           // Blue 600
-    public static final Color INFO_BG = new Color(239, 246, 255);      // Blue 50
-    public static final Color INFO_BORDER = new Color(191, 219, 254);  // Blue 200
+    public static final Color INFO = new Color(37, 99, 235);
+    public static final Color INFO_BG = new Color(239, 246, 255);
+    public static final Color INFO_BORDER = new Color(191, 219, 254);
 
     // --- Typography Hierarchy ---
     public static final Font FONT_HERO = new Font("SansSerif", Font.BOLD, 20);

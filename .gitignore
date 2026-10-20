@@ -4,3 +4,5 @@ bin/
 .idea/
 *.log
 data/cache/
+*.pptx.bak
+.agents/

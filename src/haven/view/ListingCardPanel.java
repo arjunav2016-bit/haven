@@ -26,7 +26,7 @@ import java.util.function.Consumer;
  * Features:
  * - Left Property Photo Thumbnail (clickable to launch ImageGalleryDialog carousel)
  * - Center details column with Decorator Pattern Featured badge, verified ratings, metrics, and amenities
- * - Right pricing callout and action column (Enquire & Book, Cost Calculator, Direct Chat, Map, Wishlist)
+ * - Right pricing callout and action column (Enquire & Book, Direct Chat, Map, Wishlist)
  */
 public class ListingCardPanel extends JPanel {
     private final Accommodation accommodation;
@@ -101,123 +101,167 @@ public class ListingCardPanel extends JPanel {
         });
 
         // =========================================================================
-        // LEFT COLUMN: PROPERTY PHOTO THUMBNAIL (Clickable for ImageGalleryDialog)
+        // =========================================================================
+        // LEFT COLUMN: PROPERTY PHOTO THUMBNAIL (Sleek rounded preview with badge overlay)
+        // =========================================================================
         try {
             PropertyImageStorage.ensureDefaultImagesForAccommodation(accommodation);
         } catch (Exception ignored) {}
         List<String> imgPaths = accommodation.getImagePaths();
         String primaryImg = imgPaths.isEmpty() ? null : imgPaths.get(0);
 
-        JPanel thumbPanel = new JPanel(new BorderLayout(0, 4));
-        thumbPanel.setOpaque(false);
-        thumbPanel.setPreferredSize(new Dimension(136, 132));
-
-        JComponent imageThumbComponent;
-        ImageIcon icon = null;
+        ImageIcon loadedIcon = null;
         if (primaryImg != null && new java.io.File(primaryImg).exists()) {
-            icon = PropertyImageStorage.loadScaledIcon(primaryImg, 134, 104);
+            loadedIcon = PropertyImageStorage.loadScaledIcon(primaryImg, 142, 114);
         }
+        final ImageIcon finalIcon = loadedIcon;
 
-        if (icon != null) {
-            JLabel thumbLabel = new JLabel("", SwingConstants.CENTER);
-            thumbLabel.setIcon(icon);
-            thumbLabel.setBorder(new LineBorder(HavenTheme.BORDER_LIGHT, 1));
-            thumbLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            thumbLabel.setToolTipText("Click to open full photo gallery (" + imgPaths.size() + " photos)");
-            thumbLabel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    openPhotoGallery();
+        JPanel thumbPanel = new JPanel(new BorderLayout());
+        thumbPanel.setOpaque(false);
+        thumbPanel.setPreferredSize(new Dimension(142, 114));
+        thumbPanel.setMinimumSize(new Dimension(142, 114));
+        thumbPanel.setMaximumSize(new Dimension(142, 114));
+        thumbPanel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        thumbPanel.setToolTipText("Click to open full photo gallery (" + imgPaths.size() + " photos)");
+        thumbPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                openPhotoGallery();
+            }
+        });
+
+        JComponent imageThumbComponent = new JComponent() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+                int w = getWidth();
+                int h = getHeight();
+                Shape origClip = g2.getClip();
+                Shape clip = new java.awt.geom.RoundRectangle2D.Float(0, 0, w, h, 8, 8);
+                g2.clip(clip);
+
+                if (finalIcon != null) {
+                    g2.drawImage(finalIcon.getImage(), 0, 0, w, h, null);
+                } else {
+                    g2.setPaint(new GradientPaint(0, 0, new Color(241, 245, 249), 0, h, new Color(226, 232, 240)));
+                    g2.fillRect(0, 0, w, h);
+                    g2.setColor(new Color(100, 116, 139));
+                    g2.setFont(HavenTheme.FONT_CAPTION_BOLD);
+                    FontMetrics fm = g2.getFontMetrics();
+                    String t = "HAVEN STAY";
+                    g2.drawString(t, (w - fm.stringWidth(t)) / 2, h / 2 - 2);
+                    g2.setFont(HavenTheme.FONT_BADGE);
+                    fm = g2.getFontMetrics();
+                    String sub = "Click for photos";
+                    g2.drawString(sub, (w - fm.stringWidth(sub)) / 2, h / 2 + 13);
                 }
-            });
-            imageThumbComponent = thumbLabel;
-        } else {
-            JPanel fallbackPanel = createFallbackImagePanel(accommodation.getName(), 134, 104);
-            fallbackPanel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            fallbackPanel.setToolTipText("No photo file available on disk. Click to open gallery or upload.");
-            fallbackPanel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    openPhotoGallery();
+
+                // Overlay Photo Count Badge in bottom-right corner
+                if (!imgPaths.isEmpty()) {
+                    String countText = "📷 " + imgPaths.size();
+                    g2.setFont(new Font("SansSerif", Font.BOLD, 10));
+                    FontMetrics bfm = g2.getFontMetrics();
+                    int bw = bfm.stringWidth(countText) + 10;
+                    int bh = 18;
+                    int bx = w - bw - 6;
+                    int by = h - bh - 6;
+
+                    g2.setColor(new Color(15, 23, 42, 195));
+                    g2.fillRoundRect(bx, by, bw, bh, 6, 6);
+                    g2.setColor(Color.WHITE);
+                    g2.drawString(countText, bx + 5, by + bfm.getAscent() + 1);
                 }
-            });
-            imageThumbComponent = fallbackPanel;
-        }
 
-        JButton galleryChipBtn = ModernButton.subtle("Photos (" + imgPaths.size() + ")");
-        galleryChipBtn.setFont(HavenTheme.FONT_BADGE);
-        galleryChipBtn.setBorder(new EmptyBorder(2, 4, 2, 4));
-        galleryChipBtn.addActionListener(e -> openPhotoGallery());
-
+                g2.setClip(origClip);
+                g2.setColor(HavenTheme.BORDER_LIGHT);
+                g2.drawRoundRect(0, 0, w - 1, h - 1, 8, 8);
+                g2.dispose();
+            }
+        };
         thumbPanel.add(imageThumbComponent, BorderLayout.CENTER);
-        thumbPanel.add(galleryChipBtn, BorderLayout.SOUTH);
         add(thumbPanel, BorderLayout.WEST);
 
         // =========================================================================
-        // CENTER CONTENT COLUMN
+        // CENTER CONTENT COLUMN (Clean hierarchy, refined spacing, zero congestion)
         // =========================================================================
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         infoPanel.setOpaque(false);
 
-        // 1. Title Row: Decorator Featured Badge + Type Badge + Title + Rating Badge + Compare Checkbox
-        JPanel titleRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 7, 0));
-        titleRow.setOpaque(false);
-        titleRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        // 1. Meta / Category Row + Rating + Compare Checkbox
+        JPanel metaRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        metaRow.setOpaque(false);
+        metaRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        boolean isHostel = (accommodation instanceof Hostel);
+        String categoryText = (isHostel ? "HOSTEL" : "PG / STAY") + " • " + accommodation.getGenderAllowed().toUpperCase();
+        JLabel catLabel = new JLabel(categoryText);
+        catLabel.setFont(new Font("SansSerif", Font.BOLD, 11));
+        catLabel.setForeground(isHostel ? HavenTheme.PRIMARY : new Color(13, 148, 136));
+        metaRow.add(catLabel);
 
         if (accommodation.isFeatured()) {
             FeaturedAccommodationDecorator decorated = new FeaturedAccommodationDecorator(accommodation, "FEATURED", 0.0);
-            JLabel featuredBadge = HavenTheme.createBadge(
-                    decorated.getHighlightBadgeText(),
+            JLabel featTag = HavenTheme.createBadge(
+                    "★ " + decorated.getHighlightBadgeText(),
                     HavenTheme.WARNING,
                     HavenTheme.WARNING_BG,
                     HavenTheme.WARNING_BORDER
             );
-            titleRow.add(featuredBadge);
+            featTag.setFont(new Font("SansSerif", Font.BOLD, 10));
+            metaRow.add(featTag);
         }
 
-        boolean isHostel = (accommodation instanceof Hostel);
-        JLabel typeBadge = HavenTheme.createBadge(
-                isHostel ? "HOSTEL" : "PG / STAY",
-                isHostel ? HavenTheme.PRIMARY : new Color(13, 148, 136),
-                isHostel ? HavenTheme.PRIMARY_LIGHT : new Color(240, 253, 250),
-                isHostel ? HavenTheme.PRIMARY_BORDER : new Color(153, 246, 228)
-        );
-        titleRow.add(typeBadge);
-
-        JLabel titleLabel = new JLabel(accommodation.getName());
-        titleLabel.setFont(HavenTheme.FONT_TITLE);
-        titleLabel.setForeground(HavenTheme.TEXT_PRIMARY);
-        titleRow.add(titleLabel);
-
-        // Verified Review Rating Badge
+        // Verified Review Rating Badge (Clean inline style)
         double avgRating = this.reviewDAO.getAverageRating(accommodation.getId());
         int reviewCount = this.reviewDAO.getReviewCount(accommodation.getId());
-        String ratingBadgeText = reviewCount > 0
-                ? String.format("★ %.1f (%d)", avgRating, reviewCount)
-                : "★ New";
-        JButton ratingBadge = new JButton(ratingBadgeText);
-        ratingBadge.setFont(HavenTheme.FONT_CAPTION_BOLD);
-        ratingBadge.setForeground(HavenTheme.WARNING);
-        ratingBadge.setBackground(HavenTheme.WARNING_BG);
-        ratingBadge.setBorder(BorderFactory.createCompoundBorder(
-                new LineBorder(HavenTheme.WARNING_BORDER, 1, true),
-                new EmptyBorder(2, 8, 2, 8)
+        JButton ratingBtn = new JButton();
+        ratingBtn.setFont(new Font("SansSerif", Font.BOLD, 11));
+        ratingBtn.setFocusPainted(false);
+        ratingBtn.setContentAreaFilled(false);
+        ratingBtn.setBorder(BorderFactory.createCompoundBorder(
+                new LineBorder(new Color(253, 230, 138), 1, true),
+                new EmptyBorder(1, 6, 1, 6)
         ));
-        ratingBadge.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        ratingBadge.setFocusPainted(false);
-        ratingBadge.setToolTipText("View verified student reviews or write your experience");
-        ratingBadge.addActionListener(e -> {
+        ratingBtn.setBackground(new Color(254, 252, 232));
+        ratingBtn.setOpaque(true);
+        ratingBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        if (reviewCount > 0) {
+            ratingBtn.setText(String.format("★ %.1f (%d)", avgRating, reviewCount));
+            ratingBtn.setForeground(new Color(180, 83, 9));
+        } else {
+            ratingBtn.setText("★ New");
+            ratingBtn.setForeground(new Color(180, 83, 9));
+        }
+        ratingBtn.setToolTipText("View verified student reviews or write your experience");
+        ratingBtn.addActionListener(e -> {
             ReviewsDialog dialog = new ReviewsDialog(SwingUtilities.getWindowAncestor(this), accommodation, this.reviewDAO, currentUser, onStateChanged);
             dialog.setVisible(true);
         });
-        titleRow.add(ratingBadge);
+        metaRow.add(ratingBtn);
 
         if (onCompareToggled != null) {
-            JCheckBox compareCheck = new JCheckBox("Compare");
-            compareCheck.setFont(HavenTheme.FONT_CAPTION_BOLD);
-            compareCheck.setForeground(HavenTheme.TEXT_BODY);
+            metaRow.add(Box.createHorizontalStrut(6));
+            JCheckBox compareCheck = new JCheckBox("Compare") {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    // Ensure pristine white card surface beneath text to avoid subpixel ghosting/cutting
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setColor(HavenTheme.SURFACE_WHITE);
+                    g2.fillRect(0, 0, getWidth(), getHeight());
+                    g2.dispose();
+                    super.paintComponent(g);
+                }
+            };
+            compareCheck.setFont(HavenTheme.FONT_CAPTION);
+            compareCheck.setForeground(HavenTheme.TEXT_SECONDARY);
             compareCheck.setOpaque(false);
+            compareCheck.setFocusPainted(false);
+            compareCheck.setCursor(new Cursor(Cursor.HAND_CURSOR));
             compareCheck.setSelected(isCompared);
             compareCheck.setToolTipText("Add or remove from side-by-side comparison dock");
             compareCheck.addActionListener(e -> {
@@ -225,91 +269,97 @@ public class ListingCardPanel extends JPanel {
                 if (!accepted) {
                     compareCheck.setSelected(!compareCheck.isSelected());
                 }
+                ListingCardPanel.this.repaint();
             });
-            titleRow.add(compareCheck);
+            metaRow.add(compareCheck);
         }
-        infoPanel.add(titleRow);
+        infoPanel.add(metaRow);
 
-        // 2. Location & College Subtitle
-        String locText = String.format("%.1f km from %s", accommodation.getDistanceFromCollege(), accommodation.getNearbyCollege());
-        if (accommodation.getAddress() != null && !accommodation.getAddress().isEmpty()) {
-            locText += " • " + accommodation.getAddress();
+        // 2. Title Row (Prominent, High-Contrast)
+        JLabel titleLabel = new JLabel(accommodation.getName());
+        titleLabel.setFont(HavenTheme.FONT_TITLE);
+        titleLabel.setForeground(HavenTheme.TEXT_PRIMARY);
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        infoPanel.add(Box.createVerticalStrut(3));
+        infoPanel.add(titleLabel);
+
+        // 3. Location & Area (Clean, Scannable with full details in Tooltip)
+        String shortLoc = extractLocality(accommodation.getAddress());
+        String locDisplay = String.format("📍 %.1f km from %s", accommodation.getDistanceFromCollege(), accommodation.getNearbyCollege());
+        if (!shortLoc.isEmpty()) {
+            locDisplay += " • " + shortLoc;
         }
-        if (accommodation.getContactPhone() != null && !accommodation.getContactPhone().isEmpty()) {
-            locText += " • Ph: " + accommodation.getContactPhone();
-        }
-        JLabel locLabel = new JLabel(locText);
-        locLabel.setFont(HavenTheme.FONT_CAPTION);
+        JLabel locLabel = new JLabel(locDisplay);
+        locLabel.setFont(HavenTheme.FONT_BODY);
         locLabel.setForeground(HavenTheme.TEXT_SECONDARY);
         locLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        infoPanel.add(Box.createVerticalStrut(4));
+
+        String fullTooltip = String.format("<html><body style='padding: 4px; font-family: sans-serif;'>" +
+                "<b style='font-size: 12px; color: #0F172A;'>%s</b><br/>" +
+                "<span style='color: #475569;'>Distance: %.1f km from %s</span><br/>" +
+                "<span style='color: #475569;'>Address: %s</span><br/>" +
+                "<span style='color: #475569;'>Contact Phone: %s</span>" +
+                "</body></html>",
+                accommodation.getName(), accommodation.getDistanceFromCollege(), accommodation.getNearbyCollege(),
+                accommodation.getAddress() != null ? accommodation.getAddress() : "N/A",
+                accommodation.getContactPhone() != null ? accommodation.getContactPhone() : "N/A");
+        locLabel.setToolTipText(fullTooltip);
+        infoPanel.add(Box.createVerticalStrut(3));
         infoPanel.add(locLabel);
 
-        // 3. Metric Badges Row (Base Rent, Mess/Food, Vacancies, Gender, Curfew)
-        JPanel metricsRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
-        metricsRow.setOpaque(false);
-        metricsRow.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        metricsRow.add(HavenTheme.createBadge(
-                String.format("Rent: ₹%,.0f/mo", accommodation.getBaseRent()),
-                HavenTheme.TEXT_BODY, HavenTheme.BG_MUTED, HavenTheme.BORDER_LIGHT
-        ));
-
-        if (isHostel) {
-            Hostel h = (Hostel) accommodation;
-            metricsRow.add(HavenTheme.createBadge(
-                    String.format("Mess: ₹%,.0f", h.getMessFee()),
-                    HavenTheme.TEXT_BODY, HavenTheme.BG_MUTED, HavenTheme.BORDER_LIGHT
-            ));
-            metricsRow.add(HavenTheme.createBadge(
-                    "Curfew: " + h.getCurfewTime(),
-                    HavenTheme.TEXT_SECONDARY, HavenTheme.BG_CANVAS, HavenTheme.BORDER_LIGHT
-            ));
-        } else {
-            PG pg = (PG) accommodation;
-            metricsRow.add(HavenTheme.createBadge(
-                    pg.isFoodIncluded() ? "Food Included" : "Self-Cook",
-                    HavenTheme.TEXT_BODY, HavenTheme.BG_MUTED, HavenTheme.BORDER_LIGHT
-            ));
-            metricsRow.add(HavenTheme.createBadge(
-                    String.format("Utilities: ₹%,.0f", pg.getUtilityCharges()),
-                    HavenTheme.TEXT_SECONDARY, HavenTheme.BG_CANVAS, HavenTheme.BORDER_LIGHT
-            ));
-        }
+        // 4. Availability & Specs Row (Replaces chaotic badge cluster with clean typography)
+        JPanel termsRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        termsRow.setOpaque(false);
+        termsRow.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         int vacancies = accommodation.getVacancies();
+        JLabel vacancyBadge;
         if (vacancies > 0) {
-            metricsRow.add(HavenTheme.createBadge(
+            vacancyBadge = HavenTheme.createBadge(
                     "● " + vacancies + " Bed" + (vacancies == 1 ? "" : "s") + " Available",
                     HavenTheme.SUCCESS, HavenTheme.SUCCESS_BG, HavenTheme.SUCCESS_BORDER
-            ));
+            );
         } else {
-            metricsRow.add(HavenTheme.createBadge(
+            vacancyBadge = HavenTheme.createBadge(
                     "● Fully Booked",
                     HavenTheme.DANGER, HavenTheme.DANGER_BG, HavenTheme.DANGER_BORDER
-            ));
+            );
         }
+        vacancyBadge.setFont(HavenTheme.FONT_CAPTION_BOLD);
+        termsRow.add(vacancyBadge);
 
-        metricsRow.add(HavenTheme.createBadge(
-                accommodation.getGenderAllowed(),
-                HavenTheme.PRIMARY, HavenTheme.PRIMARY_LIGHT, HavenTheme.PRIMARY_BORDER
-        ));
+        String specsText;
+        if (isHostel) {
+            Hostel h = (Hostel) accommodation;
+            specsText = String.format("Rent: ₹%,.0f/mo  •  Mess: ₹%,.0f  •  Curfew: %s",
+                    accommodation.getBaseRent(), h.getMessFee(), h.getCurfewTime());
+        } else {
+            PG pg = (PG) accommodation;
+            specsText = String.format("Rent: ₹%,.0f/mo  •  %s  •  Utilities: ₹%,.0f",
+                    accommodation.getBaseRent(), pg.isFoodIncluded() ? "Food Included" : "Self-Cook", pg.getUtilityCharges());
+        }
+        JLabel specsLabel = new JLabel(specsText);
+        specsLabel.setFont(HavenTheme.FONT_BODY);
+        specsLabel.setForeground(HavenTheme.TEXT_BODY);
+        termsRow.add(specsLabel);
 
         infoPanel.add(Box.createVerticalStrut(7));
-        infoPanel.add(metricsRow);
+        infoPanel.add(termsRow);
 
-        // 4. Amenities Tags Row (No Emojis)
+        // 5. Amenities Tags Row (Subtle, modern chips)
         List<String> amenities = accommodation.getAmenities();
         if (amenities != null && !amenities.isEmpty()) {
-            JPanel amenitiesRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+            JPanel amenitiesRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
             amenitiesRow.setOpaque(false);
             amenitiesRow.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-            for (String am : amenities) {
-                JLabel tag = new JLabel("✓ " + am);
-                tag.setFont(HavenTheme.FONT_BADGE);
+            int maxShow = Math.min(amenities.size(), 4);
+            for (int i = 0; i < maxShow; i++) {
+                String am = amenities.get(i);
+                JLabel tag = new JLabel(am);
+                tag.setFont(HavenTheme.FONT_CAPTION);
                 tag.setForeground(HavenTheme.TEXT_BODY);
-                tag.setBackground(HavenTheme.BG_CANVAS);
+                tag.setBackground(new Color(241, 245, 249));
                 tag.setOpaque(true);
                 tag.setBorder(BorderFactory.createCompoundBorder(
                         new LineBorder(HavenTheme.BORDER_LIGHT, 1, true),
@@ -317,7 +367,16 @@ public class ListingCardPanel extends JPanel {
                 ));
                 amenitiesRow.add(tag);
             }
-            infoPanel.add(Box.createVerticalStrut(7));
+            if (amenities.size() > 4) {
+                int moreCount = amenities.size() - 4;
+                JLabel moreTag = new JLabel("+" + moreCount + " more");
+                moreTag.setFont(HavenTheme.FONT_CAPTION_BOLD);
+                moreTag.setForeground(HavenTheme.PRIMARY);
+                moreTag.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                moreTag.setToolTipText("All Amenities: " + String.join(", ", amenities));
+                amenitiesRow.add(moreTag);
+            }
+            infoPanel.add(Box.createVerticalStrut(6));
             infoPanel.add(amenitiesRow);
         }
 
@@ -325,22 +384,22 @@ public class ListingCardPanel extends JPanel {
         add(infoPanel, BorderLayout.CENTER);
 
         // =========================================================================
-        // RIGHT ACTION & PRICING COLUMN
+        // RIGHT ACTION & PRICING COLUMN (Clear hierarchy: Primary -> Tool -> Utility)
         // =========================================================================
         JPanel actionCol = new JPanel();
         actionCol.setLayout(new BoxLayout(actionCol, BoxLayout.Y_AXIS));
         actionCol.setOpaque(false);
-        actionCol.setPreferredSize(new Dimension(212, 152));
-        actionCol.setMinimumSize(new Dimension(212, 152));
+        actionCol.setPreferredSize(new Dimension(205, 126));
+        actionCol.setMinimumSize(new Dimension(205, 126));
 
         double totalEst = accommodation.calculateTotalMonthlyCost(1);
 
         JLabel priceVal = new JLabel(String.format("₹%,.0f", totalEst));
-        priceVal.setFont(HavenTheme.FONT_HERO);
+        priceVal.setFont(new Font("SansSerif", Font.BOLD, 22));
         priceVal.setForeground(HavenTheme.PRIMARY);
         priceVal.setAlignmentX(Component.RIGHT_ALIGNMENT);
 
-        JLabel priceSub = new JLabel("/ month total est.");
+        JLabel priceSub = new JLabel("/ month (total est.)");
         priceSub.setFont(HavenTheme.FONT_CAPTION);
         priceSub.setForeground(HavenTheme.TEXT_SECONDARY);
         priceSub.setAlignmentX(Component.RIGHT_ALIGNMENT);
@@ -352,49 +411,37 @@ public class ListingCardPanel extends JPanel {
         priceBlock.add(priceVal);
         priceBlock.add(priceSub);
         actionCol.add(priceBlock);
-        actionCol.add(Box.createVerticalStrut(6));
+        actionCol.add(Box.createVerticalStrut(8));
 
         // Primary Action: Enquire & Book
         JButton enquireBtn = ModernButton.primary("Enquire & Book");
-        enquireBtn.setPreferredSize(new Dimension(206, 30));
-        enquireBtn.setMaximumSize(new Dimension(206, 30));
-        enquireBtn.setBorder(BorderFactory.createEmptyBorder(4, 10, 4, 10));
+        enquireBtn.setPreferredSize(new Dimension(198, 34));
+        enquireBtn.setMaximumSize(new Dimension(198, 34));
+        enquireBtn.setFont(HavenTheme.FONT_BODY_BOLD);
         enquireBtn.setAlignmentX(Component.RIGHT_ALIGNMENT);
         enquireBtn.setEnabled(accommodation.getVacancies() > 0);
         enquireBtn.addActionListener(e -> openEnquiryDialog());
         actionCol.add(enquireBtn);
-        actionCol.add(Box.createVerticalStrut(4));
-
-        // Secondary Action: Cost Calculator
-        JButton calcBtn = ModernButton.secondary("Cost Calculator");
-        calcBtn.setPreferredSize(new Dimension(206, 26));
-        calcBtn.setMaximumSize(new Dimension(206, 26));
-        calcBtn.setBorder(BorderFactory.createEmptyBorder(3, 8, 3, 8));
-        calcBtn.setAlignmentX(Component.RIGHT_ALIGNMENT);
-        calcBtn.setFont(HavenTheme.FONT_CAPTION_BOLD);
-        calcBtn.setToolTipText("Calculate monthly cost based on room sharing");
-        calcBtn.addActionListener(e -> openCostCalculatorDialog());
-        actionCol.add(calcBtn);
-        actionCol.add(Box.createVerticalStrut(4));
+        actionCol.add(Box.createVerticalStrut(8));
 
         // Utility Row: Chat, Map & Wishlist
-        JPanel utilRow = new JPanel(new GridLayout(1, 3, 4, 0));
+        JPanel utilRow = new JPanel(new GridLayout(1, 3, 5, 0));
         utilRow.setOpaque(false);
-        utilRow.setPreferredSize(new Dimension(206, 26));
-        utilRow.setMaximumSize(new Dimension(206, 26));
+        utilRow.setPreferredSize(new Dimension(198, 28));
+        utilRow.setMaximumSize(new Dimension(198, 28));
         utilRow.setAlignmentX(Component.RIGHT_ALIGNMENT);
 
         JButton chatBtn = ModernButton.subtle("Chat");
-        chatBtn.setFont(HavenTheme.FONT_CAPTION);
-        chatBtn.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        chatBtn.setFont(HavenTheme.FONT_CAPTION_BOLD);
+        chatBtn.setBorder(new EmptyBorder(2, 2, 2, 2));
         chatBtn.setToolTipText("Open direct chat with the property owner");
         chatBtn.addActionListener(e -> {
             new ChatDialog(SwingUtilities.getWindowAncestor(this), currentUser, accommodation).setVisible(true);
         });
 
         JButton mapBtn = ModernButton.subtle("Map");
-        mapBtn.setFont(HavenTheme.FONT_CAPTION);
-        mapBtn.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        mapBtn.setFont(HavenTheme.FONT_CAPTION_BOLD);
+        mapBtn.setBorder(new EmptyBorder(2, 2, 2, 2));
         mapBtn.setToolTipText("View pin on HAVEN interactive map or open Google Maps");
         mapBtn.addActionListener(e -> {
             if (onViewMapCallback != null) {
@@ -405,9 +452,9 @@ public class ListingCardPanel extends JPanel {
             }
         });
 
-        wishlistBtn = ModernButton.subtle("☆ Save");
-        wishlistBtn.setFont(HavenTheme.FONT_CAPTION);
-        wishlistBtn.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        wishlistBtn = ModernButton.subtle("Save");
+        wishlistBtn.setFont(HavenTheme.FONT_CAPTION_BOLD);
+        wishlistBtn.setBorder(new EmptyBorder(2, 2, 2, 2));
         updateWishlistButtonLabel();
         wishlistBtn.addActionListener(e -> {
             userDAO.toggleWishlist(currentUser.getUsername(), accommodation.getId());
@@ -430,6 +477,19 @@ public class ListingCardPanel extends JPanel {
         add(actionCol, BorderLayout.EAST);
     }
 
+    private String extractLocality(String fullAddress) {
+        if (fullAddress == null || fullAddress.trim().isEmpty()) return "";
+        String[] parts = fullAddress.split(",");
+        for (int i = parts.length - 1; i >= 0; i--) {
+            String p = parts[i].trim();
+            if (!p.isEmpty() && !p.toLowerCase().startsWith("ph:") && !p.toLowerCase().startsWith("ph ")
+                    && !p.toLowerCase().startsWith("tc") && !p.toLowerCase().startsWith("pin")) {
+                return p;
+            }
+        }
+        return parts[parts.length - 1].trim();
+    }
+
     private void openPhotoGallery() {
         new ImageGalleryDialog(SwingUtilities.getWindowAncestor(this), accommodation, currentUser, onStateChanged).setVisible(true);
     }
@@ -437,7 +497,7 @@ public class ListingCardPanel extends JPanel {
     @Override
     public Dimension getPreferredSize() {
         Dimension d = super.getPreferredSize();
-        return new Dimension(d.width, Math.max(d.height, 178));
+        return new Dimension(d.width, Math.max(d.height, 156));
     }
 
     @Override
@@ -448,57 +508,20 @@ public class ListingCardPanel extends JPanel {
 
     @Override
     public Dimension getMinimumSize() {
-        return new Dimension(520, 172);
+        return new Dimension(520, 150);
     }
 
     private void updateWishlistButtonLabel() {
         List<String> wishlist = userDAO.getWishlist(currentUser.getUsername());
         if (wishlist.contains(accommodation.getId())) {
-            wishlistBtn.setText("★ Saved");
+            wishlistBtn.setText("Saved");
             wishlistBtn.setForeground(HavenTheme.WARNING);
         } else {
-            wishlistBtn.setText("☆ Save");
+            wishlistBtn.setText("Save");
             wishlistBtn.setForeground(HavenTheme.TEXT_BODY);
         }
     }
 
-    private void openCostCalculatorDialog() {
-        String[] options = {"1-Person (Single Room)", "2-Sharing Room", "3-Sharing Room"};
-        JComboBox<String> sharingBox = new JComboBox<>(options);
-        JLabel resultLabel = new JLabel();
-        resultLabel.setFont(HavenTheme.FONT_BODY_BOLD);
-        resultLabel.setForeground(HavenTheme.PRIMARY);
-
-        JLabel breakdownLabel = new JLabel();
-        breakdownLabel.setFont(HavenTheme.FONT_CAPTION);
-        breakdownLabel.setForeground(HavenTheme.TEXT_SECONDARY);
-
-        Runnable updateCost = () -> {
-            int sharing = sharingBox.getSelectedIndex() + 1;
-            double totalCost = accommodation.calculateTotalMonthlyCost(sharing);
-            resultLabel.setText(String.format("Estimated Total: ₹%,.0f / month", totalCost));
-            if (accommodation instanceof Hostel) {
-                Hostel h = (Hostel) accommodation;
-                breakdownLabel.setText(String.format("Calculation: Base Rent factored (₹%,.0f) + Fixed Mess (₹%,.0f)",
-                        (totalCost - h.getMessFee()), h.getMessFee()));
-            } else {
-                PG pg = (PG) accommodation;
-                breakdownLabel.setText(String.format("Calculation: Rent + Utilities (₹%,.0f) %s",
-                        pg.getUtilityCharges(), pg.isFoodIncluded() ? "+ Food Option" : ""));
-            }
-        };
-
-        sharingBox.addActionListener(e -> updateCost.run());
-        updateCost.run();
-
-        JPanel calcPanel = new JPanel(new GridLayout(4, 1, 6, 6));
-        calcPanel.add(new JLabel("Select Room Sharing Tier:"));
-        calcPanel.add(sharingBox);
-        calcPanel.add(resultLabel);
-        calcPanel.add(breakdownLabel);
-
-        JOptionPane.showMessageDialog(this, calcPanel, "Monthly Cost Calculator - " + accommodation.getName(), JOptionPane.PLAIN_MESSAGE);
-    }
 
     public void openEnquiryDialog() {
         String defaultPhone = (currentUser != null && currentUser.getPhone() != null && !currentUser.getPhone().trim().isEmpty())

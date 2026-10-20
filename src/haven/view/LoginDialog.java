@@ -10,11 +10,8 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
- * LoginDialog - Professional login portal for HAVEN.
- * Features:
- * - Clean inputs with HavenTheme typography and borders
- * - One-click Viva Demo quick-fill buttons for Student and Owner roles
- * - Clean layout without emojis
+ * LoginDialog - Authentication and role selection for HAVEN.
+ * Allows sign in as Student, Owner, or Admin with test account quick-fill options.
  */
 public class LoginDialog extends JDialog {
     private final UserDAO userDAO;

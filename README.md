@@ -1,16 +1,50 @@
-# HAVEN - Hostel & Accommodation Verification & Enrollment Network
+# HAVEN - Student Hostel & Accommodation Network
 
-[![Java](https://img.shields.io/badge/Java-11%2B-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
-[![Swing](https://img.shields.io/badge/GUI-Java%20Swing%20%2B%20Graphics2D-blue?style=for-the-badge)](https://docs.oracle.com/javase/tutorial/uiswing/)
-[![MongoDB](https://img.shields.io/badge/Database-MongoDB%20%2B%20JSON%20Fallback-green?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![Patterns](https://img.shields.io/badge/Design%20Patterns-14%20GoF%20%26%20Enterprise-indigo?style=for-the-badge)](#design-patterns-implemented-14-total)
-[![Course](https://img.shields.io/badge/Course-Semester%203%20OOP%20Project-purple?style=for-the-badge)](https://ktu.edu.in)
-
-> **HAVEN** is an enterprise-grade desktop platform engineered to solve student accommodation discovery, verification, messaging, and booking challenges around major engineering colleges in Trivandrum (**SCTCE, CET, GEC Barton Hill, MBCET, and LBS**). Designed for **Semester 3 Object-Oriented Programming (Java)** evaluation, HAVEN showcases all four OOP pillars, **14 classic Gang of Four (GoF) & enterprise design patterns**, three-tier Role-Based Access Control (**Student, Owner, Admin**), an embedded **OpenStreetMap (`JXMapViewer2`)** interactive map, real-time in-app messaging, disk-backed property photo galleries, and dual-engine data persistence (**MongoDB + Offline File-Backed JSON**).
+> **Course:** S3 B.Tech Computer Science & Engineering — CST 205 Object-Oriented Programming (Java) Lab Project  
+> **Institution:** SCT College of Engineering (SCTCE), Thiruvananthapuram | APJ Abdul Kalam Technological University (KTU)  
+> **Team Members:** Arjun AV, Ansia Sheas, Aida Elza George, Minod Kumar  
 
 ---
 
-## Table of Contents
+## 1. Project Overview & Motivation
+
+Finding safe, affordable, and verified student accommodation around major engineering colleges in Trivandrum (**SCTCE Pappanamcode, CET Kulathoor, GEC Barton Hill, MBCET, and LBS**) has always been a painful experience. Students typically rely on torn paper flyers on bus stops, word-of-mouth recommendations, or local brokers who charge high commissions. Even after finding a stay, students often discover hidden electricity bills, unexpected mess rules, or that all rooms are already full.
+
+We built **HAVEN** to solve this exact problem for our college student community.
+
+HAVEN is a Java Swing desktop platform that connects **Students**, **Property Owners / Wardens**, and **Platform Administrators**:
+* **Students** can discover verified hostels/PGs with advanced multi-criteria filtering, explore properties on an interactive **OpenStreetMap** canvas, view disk-backed photo galleries, compare stays side-by-side, send live booking enquiries, and chat directly with wardens.
+* **Property Owners** can manage room vacancies, upload photos, process incoming student enquiries through a structured approval pipeline, and track occupancy analytics.
+* **Administrators** can moderate listings, manage accounts, audit reviews, and roll back administrative operations with full **Undo / Redo** support.
+
+---
+
+## 2. Engineering Journey: Challenges We Faced & How We Solved Them
+
+Building HAVEN pushed us well beyond standard textbook examples. Over several weeks of development, testing, and debugging, we tackled three major technical hurdles:
+
+### Challenge 1: The College Lab WiFi & MongoDB Problem (Dual Persistence)
+* **The Problem:** In our local development setups, we used MongoDB (`localhost:27017`). However, when testing on college lab computers, MongoDB was not installed and the campus firewall blocked external database ports.
+* **Our Solution:** Instead of giving up on database persistence, we refactored our data layer using the **Abstract Factory** and **Repository** patterns. We implemented two parallel repository engines:
+  1. `MongoRepositoryFactory`: Uses the official MongoDB Java driver for production/local server mode.
+  2. `InMemoryRepositoryFactory` + `FilePersistenceManager`: An offline engine backed by a thread-safe JSON file (`data/haven_store.json`).
+* If MongoDB is unreachable on startup, HAVEN displays an offline notice and falls back to offline storage without crashing.
+
+### Challenge 2: Swing Event Dispatch Thread (EDT) Freezing
+* **The Problem:** Early versions froze whenever we queried large datasets or loaded property photos from disk.
+* **Our Solution:** We decoupled operations using `SwingWorker` for background loading and built a lightweight, thread-safe pub/sub event bus ([`HavenEventBus`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/pattern/event/HavenEventBus.java)) to dispatch domain events (`AccommodationEvent`, `EnquiryEvent`, `ChatEvent`) safely back onto the EDT using `SwingUtilities.invokeLater`.
+
+### Challenge 3: Eliminating Spaghetti Code with GoF Design Patterns
+* **The Problem:** Early on, our booking status logic was filled with nested `if-else` checks on strings, constructors had 15+ parameters, and admin actions had no safety net.
+* **Our Solution:** We applied the design patterns taught in our S3 syllabus:
+  * **State Pattern** for enquiry lifecycles (`PendingState` → `ContactedState` → `ConfirmedState`), preventing illegal status transitions.
+  * **Builder Pattern** for constructing complex `Hostel` and `PG` records.
+  * **Command Pattern** with an undo/redo stack in the Admin Dashboard.
+  * **Adapter Pattern** for embedding OpenStreetMap tile rendering via `JXMapViewer2`.
+
+---
+
+## 3. Table of Contents
 1. [Core Features by Role](#core-features-by-role)
 2. [Object-Oriented Programming (OOP) Architecture](#object-oriented-programming-oop-architecture)
 3. [Design Patterns Implemented (14 Total)](#design-patterns-implemented-14-total)

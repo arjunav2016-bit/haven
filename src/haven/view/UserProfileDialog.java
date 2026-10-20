@@ -11,7 +11,7 @@ import java.awt.*;
 
 /**
  * UserProfileDialog - View and edit account profile and student stay preferences.
- * Styled cleanly with HavenTheme design tokens (No Emojis).
+ * Styled using HavenTheme design constants.
  */
 public class UserProfileDialog extends JDialog {
     private final User currentUser;

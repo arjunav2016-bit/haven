@@ -85,9 +85,9 @@ public class ModernButton extends JButton {
 
         if (!isEnabled()) {
             g2.setColor(disabledBg);
-            g2.fillRoundRect(0, 0, width, height, 6, 6);
+            g2.fillRoundRect(0, 0, width, height, 8, 8);
             g2.setColor(HavenTheme.BORDER_LIGHT);
-            g2.drawRoundRect(0, 0, width - 1, height - 1, 6, 6);
+            g2.drawRoundRect(0, 0, width - 1, height - 1, 8, 8);
         } else {
             if (getModel().isPressed()) {
                 g2.setColor(pressedBg);
@@ -96,11 +96,11 @@ public class ModernButton extends JButton {
             } else {
                 g2.setColor(defaultBg);
             }
-            g2.fillRoundRect(0, 0, width, height, 6, 6);
+            g2.fillRoundRect(0, 0, width, height, 8, 8);
 
             if (borderColor != null) {
                 g2.setColor(borderColor);
-                g2.drawRoundRect(0, 0, width - 1, height - 1, 6, 6);
+                g2.drawRoundRect(0, 0, width - 1, height - 1, 8, 8);
             }
         }
         g2.dispose();

@@ -1,11 +1,12 @@
-# HAVEN - OOP Project Viva Defense & Oral Examination Guide
+# HAVEN - Lab Viva & Project Defense Prep Notes
 
-> **Prepared for Semester 3 Object-Oriented Programming (Java) Laboratory Project Evaluation**  
-> *Comprehensive Q&A and defense guide covering OOP pillars, all 14 GoF/Enterprise Design Patterns, and live demonstration steps.*
+> **S3 B.Tech Computer Science & Engineering | CST 205 Object-Oriented Programming Lab**  
+> **Team:** Arjun AV, Ansia Sheas, Aida Elza George, Minod Kumar  
+> *Quick revision notes on OOP pillars, design pattern rationale, and live demonstration steps for the external examiner.*
 
 ---
 
-## Top 20 Expected Viva Questions & Model Answers
+## Top 20 Expected Viva Questions & Answers
 
 ### 1. "Can you demonstrate how the 4 pillars of OOP are implemented in HAVEN?"
 * **Encapsulation**:

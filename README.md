@@ -2,7 +2,7 @@
 
 > **Course:** S3 B.Tech Computer Science & Engineering — CST 205 Object-Oriented Programming (Java) Lab Project  
 > **Institution:** SCT College of Engineering (SCTCE), Thiruvananthapuram | APJ Abdul Kalam Technological University (KTU)  
-> **Team Members:** Arjun AV, Ansia Sheas, Aida Elza George, Minod Kumar  
+> **Team Members:** Arjun AV, Ansia Sheas, Aida Elza George, Anjana Krishnan
 
 ---
 

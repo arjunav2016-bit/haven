@@ -35,8 +35,6 @@ public class ContactedState implements EnquiryState {
         return new CancelledState();
     }
 
-
-
     @Override
     public boolean isTerminal() {
         return false;

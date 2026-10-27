@@ -66,9 +66,6 @@ public class ToastNotification extends JPanel {
         super.paintComponent(g);
     }
 
-    /**
-     * Shows a toast notification on the glass pane or bottom of the target frame.
-     */
     public static void show(JFrame frame, String message, Type type) {
         if (frame == null) return;
 

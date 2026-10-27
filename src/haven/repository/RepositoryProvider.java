@@ -29,6 +29,10 @@ public class RepositoryProvider {
         factory = customFactory;
     }
 
+    public static synchronized void reset() {
+        factory = null;
+    }
+
     public static synchronized void initialize() {
         if (MongoDBConnection.getInstance().isOfflineMode() || !MongoDBConnection.getInstance().testConnection()) {
             MongoDBConnection.getInstance().setOfflineMode(true);

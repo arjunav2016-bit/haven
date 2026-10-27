@@ -35,8 +35,6 @@ public class CancelledState implements EnquiryState {
         return this;
     }
 
-
-
     @Override
     public boolean isTerminal() {
         return true;

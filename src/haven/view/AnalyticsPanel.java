@@ -148,7 +148,6 @@ public class AnalyticsPanel extends JPanel {
         gaugePanel.setData(occupiedBeds, totalVacancies, occupancyRate);
     }
 
-    // --- Custom Graphics2D Bar Chart Component ---
     private static class EnquiryBarChartPanel extends JPanel {
         private Map<String, Integer> statusData = new HashMap<>();
 
@@ -243,7 +242,6 @@ public class AnalyticsPanel extends JPanel {
         }
     }
 
-    // --- Custom Graphics2D Occupancy Gauge Component ---
     private static class OccupancyGaugePanel extends JPanel {
         private int occupied = 0;
         private int vacant = 0;

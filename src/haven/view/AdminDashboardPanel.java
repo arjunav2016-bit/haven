@@ -176,9 +176,6 @@ public class AdminDashboardPanel extends JPanel {
         updateUndoRedoButtons();
     }
 
-    // =========================================================================
-    // TAB 1: USER MANAGEMENT
-    // =========================================================================
     private JPanel createUsersTab() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBackground(HavenTheme.BG_CANVAS);
@@ -252,9 +249,6 @@ public class AdminDashboardPanel extends JPanel {
         }
     }
 
-    // =========================================================================
-    // TAB 2: PROPERTY MODERATION
-    // =========================================================================
     private JPanel createPropertiesTab() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBackground(HavenTheme.BG_CANVAS);
@@ -341,9 +335,6 @@ public class AdminDashboardPanel extends JPanel {
         }
     }
 
-    // =========================================================================
-    // TAB 3: REVIEW MODERATION
-    // =========================================================================
     private JPanel createReviewsTab() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBackground(HavenTheme.BG_CANVAS);
@@ -412,9 +403,6 @@ public class AdminDashboardPanel extends JPanel {
         }
     }
 
-    // =========================================================================
-    // TAB 4: SYSTEM-WIDE ANALYTICS & REPORT EXPORT
-    // =========================================================================
     private JPanel createAnalyticsTab() {
         JPanel panel = new JPanel(new BorderLayout(12, 12));
         panel.setBackground(HavenTheme.BG_CANVAS);
@@ -554,9 +542,6 @@ public class AdminDashboardPanel extends JPanel {
         }
     }
 
-    // =========================================================================
-    // TAB 5: SEED & DATA STORE MANAGEMENT
-    // =========================================================================
     private JPanel createSeedDataTab() {
         JPanel panel = new JPanel(new BorderLayout(16, 16));
         panel.setBackground(HavenTheme.BG_CANVAS);

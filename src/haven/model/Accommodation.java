@@ -256,7 +256,6 @@ public abstract class Accommodation {
         return true;
     }
 
-    // --- Image Gallery Support ---
     public List<String> getImagePaths() {
         if (imagePaths == null) imagePaths = new ArrayList<>();
         return new ArrayList<>(imagePaths);
@@ -280,7 +279,6 @@ public abstract class Accommodation {
         return null;
     }
 
-    // --- Moderation & Featured Support ---
     public ModerationStatus getModerationStatusEnum() {
         return ModerationStatus.fromString(moderationStatus);
     }

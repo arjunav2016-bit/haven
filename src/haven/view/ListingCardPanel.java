@@ -103,10 +103,6 @@ public class ListingCardPanel extends JPanel {
             }
         });
 
-        // =========================================================================
-        // =========================================================================
-        // LEFT COLUMN: PROPERTY PHOTO THUMBNAIL (Sleek rounded preview with badge overlay)
-        // =========================================================================
         try {
             PropertyImageStorage.ensureDefaultImagesForAccommodation(accommodation);
         } catch (RuntimeException ignored) {
@@ -190,9 +186,6 @@ public class ListingCardPanel extends JPanel {
         thumbPanel.add(imageThumbComponent, BorderLayout.CENTER);
         add(thumbPanel, BorderLayout.WEST);
 
-        // =========================================================================
-        // CENTER CONTENT COLUMN (Clean hierarchy, refined spacing, zero congestion)
-        // =========================================================================
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         infoPanel.setOpaque(false);
@@ -396,9 +389,6 @@ public class ListingCardPanel extends JPanel {
         infoPanel.add(Box.createVerticalGlue());
         add(infoPanel, BorderLayout.CENTER);
 
-        // =========================================================================
-        // RIGHT ACTION & PRICING COLUMN (Clear hierarchy: Primary -> Tool -> Utility)
-        // =========================================================================
         JPanel actionCol = new JPanel();
         actionCol.setLayout(new BoxLayout(actionCol, BoxLayout.Y_AXIS));
         actionCol.setOpaque(false);

@@ -9,12 +9,6 @@ import java.util.List;
  */
 public interface MessageRepository extends Repository<ChatMessage, String> {
 
-    /**
-     * Finds all messages linked to a specific enquiry ID, ordered chronologically.
-     *
-     * @param enquiryId enquiry identifier
-     * @return ordered list of chat messages
-     */
     List<ChatMessage> findByEnquiryId(String enquiryId);
 
     /**
@@ -27,12 +21,6 @@ public interface MessageRepository extends Repository<ChatMessage, String> {
      */
     List<ChatMessage> findConversation(String accommodationId, String userA, String userB);
 
-    /**
-     * Finds all messages where the given user is either sender or receiver.
-     *
-     * @param username username
-     * @return list of chat messages
-     */
     List<ChatMessage> findByParticipant(String username);
 
     /**

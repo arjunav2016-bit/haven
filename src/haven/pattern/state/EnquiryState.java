@@ -15,18 +15,8 @@ package haven.pattern.state;
  */
 public interface EnquiryState {
 
-    /**
-     * Returns the canonical uppercase status identifier (e.g., "PENDING", "CONFIRMED").
-     *
-     * @return status identifier string
-     */
     String getStatusName();
 
-    /**
-     * Returns a human-readable description of the current state.
-     *
-     * @return state description
-     */
     String getDescription();
 
     /**

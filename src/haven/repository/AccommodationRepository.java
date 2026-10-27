@@ -11,9 +11,6 @@ import java.util.List;
  */
 public interface AccommodationRepository extends Repository<Accommodation, String> {
 
-    /**
-     * Finds all accommodations owned by a specific owner username.
-     */
     List<Accommodation> findByOwnerId(String ownerUsername);
 
     /**
@@ -27,14 +24,8 @@ public interface AccommodationRepository extends Repository<Accommodation, Strin
         return findByOwnerId(ownerUsername);
     }
 
-    /**
-     * Filters accommodations by college, gender allowed, and maximum monthly rent.
-     */
     List<Accommodation> filter(String college, String gender, double maxRent);
 
-    /**
-     * Multi-criteria search supporting text search, college, gender, budget, and amenity flags.
-     */
     List<Accommodation> search(String query, String college, String gender, Double maxRent, List<String> requiredAmenities);
 
     /**
@@ -44,8 +35,5 @@ public interface AccommodationRepository extends Repository<Accommodation, Strin
      */
     boolean decrementVacancy(String id);
 
-    /**
-     * Updates the total vacancies for an accommodation.
-     */
     boolean updateVacancies(String id, int newVacancies);
 }

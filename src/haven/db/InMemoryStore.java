@@ -46,6 +46,10 @@ public class InMemoryStore {
         return instance;
     }
 
+    public static synchronized void resetInstance() {
+        instance = null;
+    }
+
     private synchronized void initStore() {
         FilePersistenceManager.PersistedData loaded = FilePersistenceManager.load();
         if (loaded != null && !loaded.accommodations.isEmpty()) {
@@ -202,7 +206,7 @@ public class InMemoryStore {
         FilePersistenceManager.save(data);
     }
 
-    // --- Accommodation operations ---
+    // Accommodation operations
     public List<Accommodation> getAllAccommodations() {
         return new ArrayList<>(accommodations);
     }
@@ -288,7 +292,7 @@ public class InMemoryStore {
         }
     }
 
-    // --- User & Auth operations ---
+    // User & Auth operations
     public synchronized boolean userExists(String username) {
         if (username == null) return false;
         return users.containsKey(username.trim().toLowerCase());
@@ -428,7 +432,7 @@ public class InMemoryStore {
         persist();
     }
 
-    // --- Enquiry operations ---
+    // Enquiry operations
     public synchronized Enquiry saveEnquiry(Enquiry entity) {
         if (entity == null) return null;
         String eqId = (entity.getEnquiryId() != null && !entity.getEnquiryId().trim().isEmpty())
@@ -506,7 +510,7 @@ public class InMemoryStore {
         persist();
     }
 
-    // --- Review operations ---
+    // Review operations
     public synchronized void addReview(Review review) {
         if (review != null) {
             reviews.removeIf(r -> r.getId() != null && r.getId().equalsIgnoreCase(review.getId()));
@@ -552,7 +556,7 @@ public class InMemoryStore {
         return reviews.stream().anyMatch(r -> accId.equalsIgnoreCase(r.getAccommodationId()) && username.equalsIgnoreCase(r.getUsername()));
     }
 
-    // --- Property Image operations ---
+    // Property Image operations
     public synchronized PropertyImage saveImage(PropertyImage img) {
         if (img == null) return null;
         images.removeIf(i -> i.getId().equalsIgnoreCase(img.getId()));
@@ -581,7 +585,7 @@ public class InMemoryStore {
         return removed;
     }
 
-    // --- Chat Message operations ---
+    // Chat Message operations
     public synchronized ChatMessage saveMessage(ChatMessage msg) {
         if (msg == null) return null;
         messages.removeIf(m -> m.getId().equalsIgnoreCase(msg.getId()));
@@ -657,7 +661,7 @@ public class InMemoryStore {
         return count;
     }
 
-    // --- Notification operations ---
+    // Notification operations
     public synchronized Notification saveNotification(Notification n) {
         if (n == null) return null;
         notifications.removeIf(existing -> existing.getId().equalsIgnoreCase(n.getId()));

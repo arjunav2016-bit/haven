@@ -21,8 +21,20 @@ import java.util.logging.Logger;
  */
 public class FilePersistenceManager {
     private static final Logger LOGGER = Logger.getLogger(FilePersistenceManager.class.getName());
-    private static final String DATA_DIR = "data";
-    private static final String STORE_PATH = "data/haven_store.json";
+    public static final String DEFAULT_STORE_PATH = "data/haven_store.json";
+    private static volatile String storePath = DEFAULT_STORE_PATH;
+
+    public static void setStorePath(String path) {
+        storePath = (path != null) ? path : DEFAULT_STORE_PATH;
+    }
+
+    public static void resetStorePath() {
+        storePath = DEFAULT_STORE_PATH;
+    }
+
+    public static String getStorePath() {
+        return storePath;
+    }
 
     public static class PersistedData {
         public List<Accommodation> accommodations = new ArrayList<>();
@@ -37,13 +49,14 @@ public class FilePersistenceManager {
     }
 
     public static boolean storeFileExists() {
-        return new File(STORE_PATH).exists();
+        return new File(getStorePath()).exists();
     }
 
     public static synchronized void save(PersistedData data) {
         try {
-            File dir = new File(DATA_DIR);
-            if (!dir.exists()) {
+            File targetFile = new File(getStorePath());
+            File dir = targetFile.getParentFile();
+            if (dir != null && !dir.exists()) {
                 dir.mkdirs();
             }
 
@@ -201,8 +214,14 @@ public class FilePersistenceManager {
             root.append("notifications", ntfDocs);
 
             String json = root.toJson();
-            Path targetPath = Paths.get(STORE_PATH);
-            Path tempPath = Paths.get(DATA_DIR, "haven_store.tmp");
+            Path targetPath = Paths.get(getStorePath());
+            Path parentDir = targetPath.getParent();
+            if (parentDir != null && !Files.exists(parentDir)) {
+                Files.createDirectories(parentDir);
+            }
+            Path tempPath = (parentDir != null)
+                    ? parentDir.resolve("haven_store.tmp")
+                    : Paths.get("haven_store.tmp");
             Files.writeString(tempPath, json, StandardCharsets.UTF_8,
                     java.nio.file.StandardOpenOption.CREATE,
                     java.nio.file.StandardOpenOption.TRUNCATE_EXISTING);
@@ -212,12 +231,12 @@ public class FilePersistenceManager {
                 Files.move(tempPath, targetPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             }
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Error saving state to " + STORE_PATH, e);
+            LOGGER.log(Level.WARNING, "Error saving state to " + getStorePath(), e);
         }
     }
 
     public static synchronized PersistedData load() {
-        File file = new File(STORE_PATH);
+        File file = new File(getStorePath());
         if (!file.exists()) {
             return null;
         }
@@ -458,7 +477,7 @@ public class FilePersistenceManager {
 
             return data;
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Failed to load " + STORE_PATH + ", falling back to seed", e);
+            LOGGER.log(Level.WARNING, "Failed to load " + getStorePath() + ", falling back to seed", e);
             return null;
         }
     }

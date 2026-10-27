@@ -58,7 +58,7 @@ public final class HavenTheme {
     public static final Color INFO_BG = new Color(239, 246, 255);
     public static final Color INFO_BORDER = new Color(191, 219, 254);
 
-    // --- Typography Hierarchy ---
+    // Typography Hierarchy
     public static final Font FONT_HERO = new Font("SansSerif", Font.BOLD, 20);
     public static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 16);
     public static final Font FONT_SUBTITLE = new Font("SansSerif", Font.BOLD, 14);
@@ -68,7 +68,7 @@ public final class HavenTheme {
     public static final Font FONT_CAPTION_BOLD = new Font("SansSerif", Font.BOLD, 11);
     public static final Font FONT_BADGE = new Font("SansSerif", Font.BOLD, 10);
 
-    // --- Borders & Containers ---
+    // Borders & Containers
     public static CompoundBorder createCardBorder() {
         return BorderFactory.createCompoundBorder(
                 new LineBorder(BORDER_LIGHT, 1, true),
@@ -90,7 +90,7 @@ public final class HavenTheme {
         );
     }
 
-    // --- Enterprise Table Styling ---
+    // Enterprise Table Styling
     public static void styleTable(JTable table) {
         table.setRowHeight(32);
         table.setFont(FONT_BODY);
@@ -143,7 +143,7 @@ public final class HavenTheme {
         }
     }
 
-    // --- Badge & Chip UI Helper ---
+    // Badge & Chip UI Helper
     public static JLabel createBadge(String text, Color fgColor, Color bgColor, Color borderColor) {
         JLabel badge = new JLabel(text, SwingConstants.CENTER);
         badge.setFont(FONT_CAPTION_BOLD);
@@ -161,7 +161,7 @@ public final class HavenTheme {
         return createBadge(text, fgColor, bgColor, bgColor);
     }
 
-    // --- Header Banner Factory ---
+    // Header Banner Factory
     public static JPanel createHeader(String titleText, String subtitleText) {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(BG_CANVAS);

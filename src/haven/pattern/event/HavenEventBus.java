@@ -30,6 +30,13 @@ public class HavenEventBus {
         return instance;
     }
 
+    public static synchronized void resetInstance() {
+        if (instance != null) {
+            instance.listeners.clear();
+        }
+        instance = null;
+    }
+
     /**
      * Subscribes a listener to a specific event type.
      */

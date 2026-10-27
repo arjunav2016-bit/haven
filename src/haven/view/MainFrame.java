@@ -108,9 +108,6 @@ public class MainFrame extends JFrame implements PanelMediator {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // =====================================================================
-        // HEADER BAR WITH NOTIFICATION BELL, PROFILE & ROLE MODE SWITCHER
-        // =====================================================================
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(HavenTheme.SURFACE_WHITE);
         topPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -202,9 +199,6 @@ public class MainFrame extends JFrame implements PanelMediator {
         cardLayout = new CardLayout();
         mainContainer = new JPanel(cardLayout);
 
-        // =====================================================================
-        // STUDENT VIEW WITH MODERN DISCOVERY TOOLBAR & ADVANCED FILTERS
-        // =====================================================================
         JPanel studentViewPanel = new JPanel(new BorderLayout());
         JPanel filterPanel = new JPanel();
         filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.Y_AXIS));
@@ -576,9 +570,7 @@ public class MainFrame extends JFrame implements PanelMediator {
         }
     }
 
-    // =========================================================================
-    // PanelMediator Interface Implementation (Mediator Pattern)
-    // =========================================================================
+    // PanelMediator implementation
     @Override
     public void showDiscoverView() {
         showMode("STUDENT");

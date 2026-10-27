@@ -8,9 +8,6 @@ import java.util.Date;
  */
 public interface AdminCommand {
 
-    /**
-     * Executes the command operation.
-     */
     void execute();
 
     /**
@@ -25,10 +22,5 @@ public interface AdminCommand {
      */
     String getDescription();
 
-    /**
-     * Returns the timestamp when the command was created or executed.
-     *
-     * @return execution timestamp
-     */
     Date getExecutedAt();
 }

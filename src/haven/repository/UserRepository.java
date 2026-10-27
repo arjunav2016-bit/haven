@@ -11,9 +11,6 @@ import java.util.List;
  */
 public interface UserRepository extends Repository<User, String> {
 
-    /**
-     * Checks if a username already exists.
-     */
     boolean userExists(String username);
 
     /**
@@ -26,30 +23,15 @@ public interface UserRepository extends Repository<User, String> {
      */
     User authenticate(String username, String rawPassword) throws AuthenticationException;
 
-    /**
-     * Registers a student user into the repository.
-     */
     void registerStudent(String username, String rawPassword, String fullName, String phone,
                          String collegeName, String genderPreference, double maxBudget);
 
-    /**
-     * Registers an owner user into the repository.
-     */
     void registerOwner(String username, String rawPassword, String fullName, String phone);
 
-    /**
-     * Updates an existing user's profile details.
-     */
     boolean updateUserProfile(User user);
 
-    /**
-     * Verifies the current password and securely updates to a new password.
-     */
     boolean changePassword(String username, String currentPassword, String newPassword) throws AuthenticationException;
 
-    /**
-     * Retrieves the wishlist accommodation IDs for a student user.
-     */
     List<String> getWishlist(String username);
 
     /**
@@ -59,9 +41,6 @@ public interface UserRepository extends Repository<User, String> {
      */
     boolean toggleWishlist(String username, String accommodationId);
 
-    /**
-     * Activates or deactivates a user account (Admin operation).
-     */
     default boolean setUserActive(String username, boolean active) {
         User u = findById(username).orElse(null);
         if (u != null) {

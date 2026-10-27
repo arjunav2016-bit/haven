@@ -35,8 +35,6 @@ public class DeclinedState implements EnquiryState {
         throw new IllegalStateException("Cannot cancel an enquiry that has already been DECLINED.");
     }
 
-
-
     @Override
     public boolean isTerminal() {
         return true;

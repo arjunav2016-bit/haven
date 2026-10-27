@@ -179,3 +179,67 @@ placeholder for missing data, not a role assertion.
 Ran `javac -Xlint:all` across all source files. **Zero unused import warnings** were reported.
 No cleanup needed.
 
+---
+
+## Phase 3 — Error Handling & Logging
+
+### Replaced Print Streams and Empty Catches with `java.util.logging.Logger`
+
+**What changed:**
+- Replaced debug `System.out.println` and `e.printStackTrace()` statements throughout production code with structured `java.util.logging.Logger` logging calls at appropriate levels (`INFO`, `WARNING`, `SEVERE`, `FINE`).
+- Replaced generic `catch (Exception e)` blocks with specific exception types where reasonable (e.g. `AuthenticationException`, `IOException`, `SQLException`, `NumberFormatException`).
+- Replaced empty or silent catch blocks with logging so errors are never silently swallowed.
+
+**Why:**
+Structured logging allows configuration of log levels, prevents leaking sensitive debug output or stack traces to terminal output in production, and guarantees proper traceability when errors occur.
+
+---
+
+## Phase 4 — Comments and Style
+
+### Cleaned Redundant Comments and Banner Headers
+
+**What changed:**
+- Removed decorative section banner comments (e.g. ASCII box lines and repeated separators).
+- Removed Javadoc comments that merely restated the name of the class or method without providing additional architectural insight or rationale.
+- Preserved comments that explain **why** non-obvious logic was implemented (e.g. defensive copying, pass-the-hash guards, thread-safety, transaction boundaries).
+- Standardized indentation, brace style, and naming conventions within individual files without unnecessary churn.
+
+**Why:**
+Improves signal-to-noise ratio in source files, ensuring developers focus on substantive design intent rather than redundant clutter.
+
+---
+
+## Phase 5 — Structure & Modularization
+
+### Step 1: Baseline Verification
+- Executed `TestEnhancements` under `java -ea -cp "bin;lib/*" haven.TestEnhancements`.
+- Verified all 37 architectural, OOP, and enhancement tests passed cleanly prior to restructuring.
+
+### Step 2: JUnit 5 Migration & Test Architecture Isolation
+
+**What changed:**
+1. **JUnit 5 Platform Integration**:
+   - Added `lib/junit-platform-console-standalone-1.10.2.jar` to provide zero-install JUnit Jupiter runtime and console launcher capabilities.
+   - Created top-level `test/haven/` directory structure containing 5 cohesive test suites:
+     - `DomainModelTest.java` (Tests 1, 2, 4, 7, 15, 16, 17, 33, 34)
+     - `RepositoryAndPersistenceTest.java` (Tests 5, 6, 8, 9, 11, 18, 19, 27, 28, 29, 30)
+     - `DesignPatternsTest.java` (Tests 3, 10, 13, 20, 21, 22, 23, 24, 25, 26, 31, 32, 36)
+     - `ViewComponentsTest.java` (Tests 12, 14, 35)
+     - `ServiceLayerTest.java` (Test 37)
+2. **Deterministic Test Isolation (`TestBase.java`)**:
+   - Added JUnit 5 `@TempDir` to isolate JSON store persistence so tests **never touch real `data/haven_store.json`**.
+   - Added configurable path overrides in `FilePersistenceManager` (`setStorePath`, `resetStorePath`, `getStorePath`).
+   - Implemented automated `@BeforeEach` and `@AfterEach` singleton resets across `InMemoryStore`, `HavenEventBus`, `RepositoryProvider`, and `ServiceProvider`.
+3. **Environment & Headless Safeguards**:
+   - Integrated `assumeNotHeadless()` on Swing view tests (`GraphicsEnvironment.isHeadless()`) to avoid graphical test failures in headless/CI environments.
+   - Integrated `assumeMongoAvailable()` for MongoDB-dependent checks.
+4. **Build & Test Automation**:
+   - Created `test.bat` which compiles all sources from both `src/` and `test/` into `bin/` and executes tests via `ConsoleLauncher execute --scan-class-path`.
+   - Deleted legacy monolithic `src/haven/TestEnhancements.java`; `test.bat` is now the single official test runner.
+   - Verified 37/37 tests execute and pass cleanly.
+
+**Why:**
+Transitioning from a monolithic procedural runner with JVM `assert` keywords to modern JUnit 5 assertions (`assertEquals`, `assertTrue`, `assertThrows`, `@DisplayName`, `@TempDir`) provides structured reporting, test isolation, individual test execution, CI compatibility, and prevents mutation of real application data.
+
+

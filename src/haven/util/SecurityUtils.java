@@ -44,9 +44,6 @@ public final class SecurityUtils {
         return hashWithSalt(plainPassword, salt, ITERATIONS);
     }
 
-    /**
-     * Hashes a password with an explicit salt and iteration count.
-     */
     public static String hashWithSalt(String plainPassword, byte[] salt, int iterations) {
         try {
             PBEKeySpec spec = new PBEKeySpec(plainPassword.toCharArray(), salt, iterations, KEY_LENGTH);
@@ -105,9 +102,6 @@ public final class SecurityUtils {
         return false;
     }
 
-    /**
-     * Checks if a stored password string is already hashed (either PBKDF2 or SHA-256).
-     */
     public static boolean isHashed(String storedPassword) {
         if (storedPassword == null) return false;
         return storedPassword.startsWith("PBKDF2$") || isSha256Hex(storedPassword);

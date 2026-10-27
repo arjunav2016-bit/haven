@@ -35,8 +35,6 @@ public class PendingState implements EnquiryState {
         return new CancelledState();
     }
 
-
-
     @Override
     public boolean isTerminal() {
         return false;

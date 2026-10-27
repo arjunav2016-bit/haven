@@ -484,7 +484,7 @@ public class OwnerDashboardPanel extends JPanel {
     public void refreshTable() {
         tableModel.setRowCount(0);
         String ownerUsername = (currentUser != null && currentUser.isOwner()) ? currentUser.getUsername() : "owner";
-        currentListings = dao.getAccommodationsByOwner(ownerUsername);
+        currentListings = dao.getAccommodationsByOwner(ownerUsername, currentUser != null ? currentUser.getRoleEnum() : null);
         for (Accommodation a : currentListings) {
             String type = (a instanceof Hostel) ? "Hostel" : "PG";
             tableModel.addRow(new Object[]{
@@ -497,7 +497,7 @@ public class OwnerDashboardPanel extends JPanel {
     public void refreshEnquiriesTable() {
         enquiryTableModel.setRowCount(0);
         String ownerUsername = (currentUser != null && currentUser.isOwner()) ? currentUser.getUsername() : "owner";
-        List<Enquiry> all = enquiryDAO.getEnquiriesForOwner(ownerUsername);
+        List<Enquiry> all = enquiryDAO.getEnquiriesForOwner(ownerUsername, currentUser != null ? currentUser.getRoleEnum() : null);
 
         String filter = (enquiryStatusFilter != null && enquiryStatusFilter.getSelectedItem() != null)
                 ? (String) enquiryStatusFilter.getSelectedItem()

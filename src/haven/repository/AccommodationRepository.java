@@ -1,6 +1,7 @@
 package haven.repository;
 
 import haven.model.Accommodation;
+import haven.model.Role;
 
 import java.util.List;
 
@@ -14,6 +15,17 @@ public interface AccommodationRepository extends Repository<Accommodation, Strin
      * Finds all accommodations owned by a specific owner username.
      */
     List<Accommodation> findByOwnerId(String ownerUsername);
+
+    /**
+     * Role-aware overload: privileged roles (OWNER, ADMIN) see all accommodations;
+     * others see only those matching ownerUsername.
+     */
+    default List<Accommodation> findByOwnerId(String ownerUsername, Role role) {
+        if (role != null && role.isPrivileged()) {
+            return findAll();
+        }
+        return findByOwnerId(ownerUsername);
+    }
 
     /**
      * Filters accommodations by college, gender allowed, and maximum monthly rent.

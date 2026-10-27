@@ -8,6 +8,7 @@ import haven.model.Accommodation;
 import haven.model.Hostel;
 import haven.model.User;
 import haven.pattern.GoogleMapsAdapter;
+import haven.pattern.OpenStreetMapAdapter;
 import haven.pattern.PropertyImageStorage;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
@@ -67,6 +68,8 @@ public class MapPanel extends JPanel {
     private final JButton chatBtn;
     private final JButton galleryBtn;
     private final JButton externalMapBtn;
+    private final JButton osmMapBtn;
+    private final OpenStreetMapAdapter osmAdapter;
 
     private static final Map<String, GeoPosition> CAMPUS_LOCATIONS = new LinkedHashMap<>();
     static {
@@ -137,8 +140,11 @@ public class MapPanel extends JPanel {
 
         add(toolbar, BorderLayout.NORTH);
 
-        // 2. Configure JXMapViewer2 with OpenStreetMap Tile Factory and Local Disk Cache
         mapViewer = new JXMapViewer();
+        this.osmAdapter = new OpenStreetMapAdapter((lat, lon) -> {
+            mapViewer.setAddressLocation(new GeoPosition(lat, lon));
+            mapViewer.repaint();
+        });
         try {
             TileFactoryInfo info = new OSMTileFactoryInfo("OpenStreetMap", "https://tile.openstreetmap.org");
             DefaultTileFactory tileFactory = new DefaultTileFactory(info);
@@ -321,15 +327,32 @@ public class MapPanel extends JPanel {
         inspector.add(galleryBtn);
         inspector.add(Box.createVerticalStrut(8));
 
-        externalMapBtn = ModernButton.subtle("Open in Browser Maps");
-        externalMapBtn.setMaximumSize(new Dimension(255, 30));
-        externalMapBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JPanel externalMapRow = new JPanel(new GridLayout(1, 2, 6, 0));
+        externalMapRow.setOpaque(false);
+        externalMapRow.setMaximumSize(new Dimension(255, 30));
+        externalMapRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        externalMapBtn = ModernButton.subtle("Google Maps");
+        externalMapBtn.setFont(HavenTheme.FONT_CAPTION_BOLD);
+        externalMapBtn.setToolTipText("Open property location in Google Maps");
         externalMapBtn.addActionListener(e -> {
             if (selectedAccommodation != null) {
                 new GoogleMapsAdapter().openLocation(selectedAccommodation.getLocationLink());
             }
         });
-        inspector.add(externalMapBtn);
+
+        osmMapBtn = ModernButton.subtle("OpenStreetMap");
+        osmMapBtn.setFont(HavenTheme.FONT_CAPTION_BOLD);
+        osmMapBtn.setToolTipText("Open coordinates on OpenStreetMap.org");
+        osmMapBtn.addActionListener(e -> {
+            if (selectedAccommodation != null) {
+                new OpenStreetMapAdapter().navigateTo(selectedAccommodation.getLatitude(), selectedAccommodation.getLongitude());
+            }
+        });
+
+        externalMapRow.add(externalMapBtn);
+        externalMapRow.add(osmMapBtn);
+        inspector.add(externalMapRow);
 
         inspector.add(Box.createVerticalGlue());
         add(inspector, BorderLayout.EAST);
@@ -357,7 +380,7 @@ public class MapPanel extends JPanel {
         if (acc == null) return;
         this.selectedAccommodation = acc;
         if (acc.getLatitude() != 0.0 && acc.getLongitude() != 0.0) {
-            mapViewer.setAddressLocation(new GeoPosition(acc.getLatitude(), acc.getLongitude()));
+            osmAdapter.navigateTo(acc.getLatitude(), acc.getLongitude());
             mapViewer.setZoom(3);
         }
         updateInspectorCard();
@@ -371,6 +394,7 @@ public class MapPanel extends JPanel {
             chatBtn.setEnabled(false);
             galleryBtn.setEnabled(false);
             externalMapBtn.setEnabled(false);
+            osmMapBtn.setEnabled(false);
             return;
         }
 
@@ -409,6 +433,7 @@ public class MapPanel extends JPanel {
         chatBtn.setEnabled(true);
         galleryBtn.setEnabled(true);
         externalMapBtn.setEnabled(true);
+        osmMapBtn.setEnabled(true);
     }
 
     private void handleMapClick(Point clickPoint) {

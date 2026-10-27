@@ -12,7 +12,7 @@
 * **Encapsulation**:
   - In [`Accommodation.java`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/model/Accommodation.java) and [`User.java`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/model/User.java), all fields (`baseRent`, `vacancies`, `password`, `amenities`, `imagePaths`) are `private`.
   - Setters enforce domain invariants (`baseRent > 0`, `vacancies >= 0`), and collections return defensive copies (`new ArrayList<>(amenities)`).
-  - Passwords are encrypted using SHA-256 in [`SecurityUtils.java`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/pattern/SecurityUtils.java).
+  - Passwords are encrypted using salted PBKDF2/SHA-256 in [`SecurityUtils.java`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/util/SecurityUtils.java).
 * **Abstraction**:
   - Generic base interface [`Repository<T, ID>`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/repository/Repository.java), abstract base classes [`Accommodation`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/model/Accommodation.java), [`User`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/model/User.java), and [`ReportGenerator`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/pattern/report/ReportGenerator.java), and behavioral interfaces [`EnquiryState`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/pattern/state/EnquiryState.java), [`AdminCommand`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/pattern/command/AdminCommand.java), and [`NavigationService`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/pattern/NavigationService.java).
 * **Inheritance**:

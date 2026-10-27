@@ -121,7 +121,7 @@ public class MongoAccommodationRepository implements AccommodationRepository {
             return list;
         }
 
-        Bson query = "owner".equalsIgnoreCase(ownerUsername) ? new Document() : Filters.eq("ownerId", ownerUsername.trim());
+        Bson query = Filters.eq("ownerId", ownerUsername.trim());
         try (MongoCursor<Document> cursor = collection.find(query).iterator()) {
             while (cursor.hasNext()) {
                 list.add(mapDocumentToModel(cursor.next()));

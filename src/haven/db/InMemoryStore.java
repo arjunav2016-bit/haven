@@ -3,13 +3,15 @@ package haven.db;
 import haven.exception.AuthenticationException;
 import haven.model.*;
 import haven.pattern.PropertyImageStorage;
-import haven.pattern.SecurityUtils;
+import haven.util.SecurityUtils;
 import haven.repository.inmemory.FilePersistenceManager;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+
+import static haven.model.Role.*;
 
 /**
  * InMemoryStore provides a zero-configuration in-memory fallback
@@ -206,10 +208,15 @@ public class InMemoryStore {
     }
 
     public List<Accommodation> getAccommodationsByOwner(String ownerUsername) {
-        if ("owner".equalsIgnoreCase(ownerUsername) || "admin".equalsIgnoreCase(ownerUsername)) {
+        return accommodations.stream().filter(a -> ownerUsername.equalsIgnoreCase(a.getOwnerId())).collect(Collectors.toList());
+    }
+
+    /** Role-aware overload: privileged roles see all accommodations. */
+    public List<Accommodation> getAccommodationsByOwner(String ownerUsername, Role role) {
+        if (role != null && role.isPrivileged()) {
             return new ArrayList<>(accommodations);
         }
-        return accommodations.stream().filter(a -> ownerUsername.equalsIgnoreCase(a.getOwnerId())).collect(Collectors.toList());
+        return getAccommodationsByOwner(ownerUsername);
     }
 
     public List<Accommodation> filterAccommodations(String college, String gender, double maxRent) {
@@ -461,10 +468,15 @@ public class InMemoryStore {
     }
 
     public List<Enquiry> getEnquiriesForOwner(String ownerUsername) {
-        if ("owner".equalsIgnoreCase(ownerUsername) || "admin".equalsIgnoreCase(ownerUsername)) {
+        return enquiries.stream().filter(e -> ownerUsername.equalsIgnoreCase(e.getOwnerId())).collect(Collectors.toList());
+    }
+
+    /** Role-aware overload: privileged roles see all enquiries. */
+    public List<Enquiry> getEnquiriesForOwner(String ownerUsername, Role role) {
+        if (role != null && role.isPrivileged()) {
             return new ArrayList<>(enquiries);
         }
-        return enquiries.stream().filter(e -> ownerUsername.equalsIgnoreCase(e.getOwnerId())).collect(Collectors.toList());
+        return getEnquiriesForOwner(ownerUsername);
     }
 
     public synchronized void updateEnquiryStatus(String enquiryId, String status) {
@@ -591,6 +603,11 @@ public class InMemoryStore {
     }
 
     public List<ChatMessage> getConversation(String accommodationId, String userA, String userB) {
+        return getConversation(accommodationId, userA, userB, null);
+    }
+
+    /** Role-aware overload: privileged callers see all messages for an accommodation. */
+    public List<ChatMessage> getConversation(String accommodationId, String userA, String userB, Role callerRole) {
         return messages.stream()
                 .filter(m -> {
                     if (accommodationId != null && !accommodationId.isEmpty() && !accommodationId.equalsIgnoreCase(m.getAccommodationId())) {
@@ -599,9 +616,10 @@ public class InMemoryStore {
                     if (userA == null || userB == null || userA.isEmpty() || userB.isEmpty()) return true;
                     boolean ab = userA.equalsIgnoreCase(m.getSenderUsername()) && userB.equalsIgnoreCase(m.getReceiverUsername());
                     boolean ba = userB.equalsIgnoreCase(m.getSenderUsername()) && userA.equalsIgnoreCase(m.getReceiverUsername());
-                    // Also allow owner alias matching ("owner" can see messages sent to property's ownerId)
-                    if (!ab && !ba && ("owner".equalsIgnoreCase(userA) || "owner".equalsIgnoreCase(userB))) {
-                        String studentParty = "owner".equalsIgnoreCase(userA) ? userB : userA;
+                    // Privileged role alias matching: owner/admin can see messages sent to any property ownerId
+                    if (!ab && !ba && callerRole != null && callerRole.isPrivileged()) {
+                        String otherParty = userA.equalsIgnoreCase(m.getSenderUsername()) ? userA : userB;
+                        String studentParty = otherParty.equals(userA) ? userB : userA;
                         return studentParty.equalsIgnoreCase(m.getSenderUsername()) || studentParty.equalsIgnoreCase(m.getReceiverUsername());
                     }
                     return ab || ba;
@@ -611,11 +629,16 @@ public class InMemoryStore {
     }
 
     public List<ChatMessage> getMessagesByParticipant(String username) {
+        return getMessagesByParticipant(username, null);
+    }
+
+    /** Role-aware overload: privileged roles see all messages. */
+    public List<ChatMessage> getMessagesByParticipant(String username, Role callerRole) {
         if (username == null) return new ArrayList<>();
         return messages.stream()
                 .filter(m -> username.equalsIgnoreCase(m.getSenderUsername())
                         || username.equalsIgnoreCase(m.getReceiverUsername())
-                        || ("owner".equalsIgnoreCase(username)))
+                        || (callerRole != null && callerRole.isPrivileged()))
                 .sorted(Comparator.comparingLong(ChatMessage::getTimestamp))
                 .collect(Collectors.toList());
     }
@@ -648,10 +671,17 @@ public class InMemoryStore {
     }
 
     public List<Notification> getNotificationsForUser(String username) {
+        return getNotificationsForUser(username, null);
+    }
+
+    /** Role-aware overload: privileged roles see owner-targeted notifications too. */
+    public List<Notification> getNotificationsForUser(String username, Role callerRole) {
         if (username == null) return new ArrayList<>();
         return notifications.stream()
                 .filter(n -> username.equalsIgnoreCase(n.getRecipientUsername())
-                        || ("owner".equalsIgnoreCase(username) && !("student".equalsIgnoreCase(n.getRecipientUsername())) && !("admin".equalsIgnoreCase(n.getRecipientUsername()))))
+                        || (callerRole != null && callerRole.isPrivileged()
+                            && !STUDENT.matches(n.getRecipientUsername())
+                            && !ADMIN.matches(n.getRecipientUsername())))
                 .sorted((a, b) -> Long.compare(b.getTimestamp(), a.getTimestamp()))
                 .collect(Collectors.toList());
     }

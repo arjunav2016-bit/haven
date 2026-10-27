@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TestEnhancements {
+    @SuppressWarnings("deprecation")
     public static void main(String[] args) {
         boolean assertsEnabled = false;
         assert assertsEnabled = true;
@@ -825,6 +826,49 @@ public class TestEnhancements {
 
         System.out.println("PASSED! (Enums, getType() OCP, Iterator.reset, ValidationUtils & NavigationService verified)");
 
-        System.out.println("\nALL 34 ENHANCEMENT, ARCHITECTURE, DESIGN PATTERN & OOP TESTS PASSED SUCCESSFULLY!");
+        // 35. Verify SplashScreenWindow Lifecycle & Progress Reporting
+        System.out.print("[TEST 35] SplashScreenWindow Lifecycle & Progress: ");
+        haven.view.SplashScreenWindow splash = new haven.view.SplashScreenWindow();
+        assert splash.getWidth() == 520 && splash.getHeight() == 290 : "SplashScreen dimensions must be 520x290";
+        splash.setProgress(15, "Testing init stage...");
+        splash.setProgress(70, "Testing repository stage...");
+        splash.setProgress(100, "Testing complete stage...");
+        splash.dispose();
+        System.out.println("PASSED! (520x290 branded splash screen, progressive updates & disposal verified)");
+
+        // 36. Verify Complete Adapter Pattern (GoogleMapsAdapter & OpenStreetMapAdapter)
+        System.out.print("[TEST 36] Adapter Pattern (GoogleMapsAdapter & OpenStreetMapAdapter): ");
+        haven.pattern.GoogleMapsAdapter gMapsAdapter = new haven.pattern.GoogleMapsAdapter();
+        assert gMapsAdapter instanceof haven.pattern.NavigationService : "GoogleMapsAdapter must implement NavigationService";
+
+        final double[] osmCoordsDispatched = {0.0, 0.0};
+        haven.pattern.OpenStreetMapAdapter osmAdapter = new haven.pattern.OpenStreetMapAdapter((lat, lon) -> {
+            osmCoordsDispatched[0] = lat;
+            osmCoordsDispatched[1] = lon;
+        });
+        assert osmAdapter instanceof haven.pattern.NavigationService : "OpenStreetMapAdapter must implement NavigationService";
+        osmAdapter.navigateTo(8.4708, 76.9804);
+        assert osmCoordsDispatched[0] == 8.4708 && osmCoordsDispatched[1] == 76.9804 : "OpenStreetMapAdapter consumer callback failed";
+        System.out.println("PASSED! (GoogleMapsAdapter & OpenStreetMapAdapter polymorphic NavigationService verified)");
+
+        // 37. Verify Unified Multi-Tier Architecture (DAO Facade -> Service Layer -> Repository)
+        System.out.print("[TEST 37] Unified Architecture (DAO Facade -> Service Layer -> Repository): ");
+        haven.db.HostelDAO unifiedHostelDAO = new haven.db.HostelDAO();
+        assert unifiedHostelDAO.getService() != null : "HostelDAO must be unified with AccommodationService";
+        assert unifiedHostelDAO.getAllAccommodations().size() == unifiedHostelDAO.getService().getAllAccommodations().size()
+                : "HostelDAO and AccommodationService query parity failed";
+
+        haven.db.UserDAO unifiedUserDAO = new haven.db.UserDAO();
+        assert unifiedUserDAO.getAuthService() != null : "UserDAO must be unified with AuthService";
+        assert unifiedUserDAO.userExists("student") && unifiedUserDAO.getAuthService().userExists("student")
+                : "UserDAO and AuthService parity failed for student user";
+
+        haven.db.EnquiryDAO unifiedEnquiryDAO = new haven.db.EnquiryDAO();
+        assert unifiedEnquiryDAO.getService() != null : "EnquiryDAO must be unified with EnquiryService";
+        assert unifiedEnquiryDAO.getEnquiriesForStudent("student").size() == unifiedEnquiryDAO.getService().getEnquiriesForStudent("student").size()
+                : "EnquiryDAO and EnquiryService parity failed for student enquiries";
+        System.out.println("PASSED! (HostelDAO -> AccommodationService, UserDAO -> AuthService, EnquiryDAO -> EnquiryService unified)");
+
+        System.out.println("\nALL 37 ENHANCEMENT, ARCHITECTURE, DESIGN PATTERN & OOP TESTS PASSED SUCCESSFULLY!");
     }
 }

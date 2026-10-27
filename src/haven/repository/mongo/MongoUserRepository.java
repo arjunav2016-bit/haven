@@ -9,7 +9,7 @@ import haven.model.Owner;
 import haven.model.Student;
 import haven.model.User;
 import haven.pattern.MongoDBConnection;
-import haven.pattern.SecurityUtils;
+import haven.util.SecurityUtils;
 import haven.repository.UserRepository;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -26,7 +26,10 @@ public class MongoUserRepository implements UserRepository {
 
     public MongoUserRepository() {
         this.collection = MongoDBConnection.getInstance().getDatabase().getCollection("users");
-        seedDefaultAccountsIfMissing();
+        // Only seed demo/test accounts when explicitly enabled via -Dhaven.seed=true
+        if (Boolean.getBoolean("haven.seed")) {
+            seedDefaultAccountsIfMissing();
+        }
     }
 
     private void seedDefaultAccountsIfMissing() {
@@ -114,13 +117,6 @@ public class MongoUserRepository implements UserRepository {
         String storedPassword = doc.getString("password");
         if (!SecurityUtils.verifyPassword(rawPassword, storedPassword)) {
             throw new AuthenticationException("Invalid username or password credentials.");
-        }
-
-        if (!SecurityUtils.isHashed(storedPassword)) {
-            collection.updateOne(
-                    Filters.eq("username", username.trim()),
-                    Updates.set("password", SecurityUtils.hashPassword(rawPassword))
-            );
         }
 
         return mapDocumentToUser(doc);

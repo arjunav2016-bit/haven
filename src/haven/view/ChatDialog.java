@@ -169,7 +169,7 @@ public class ChatDialog extends JDialog {
                 List<ChatMessage> msgs = RepositoryProvider.getMessageRepository().findConversation(acc.getId(), null, null);
                 for (int i = msgs.size() - 1; i >= 0; i--) {
                     ChatMessage m = msgs.get(i);
-                    if (!"owner".equalsIgnoreCase(m.getSenderUsername()) && m.getSenderUsername() != null && !m.getSenderUsername().isEmpty()) {
+                    if (!currentUser.getUsername().equalsIgnoreCase(m.getSenderUsername()) && m.getSenderUsername() != null && !m.getSenderUsername().isEmpty()) {
                         return m.getSenderUsername();
                     }
                 }

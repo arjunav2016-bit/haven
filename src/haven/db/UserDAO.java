@@ -4,44 +4,53 @@ import haven.exception.AuthenticationException;
 import haven.model.User;
 import haven.repository.RepositoryProvider;
 import haven.repository.UserRepository;
+import haven.service.AuthService;
+import haven.service.ServiceProvider;
 
 import java.util.List;
 
 /**
  * Adapter / Facade maintaining backward compatibility for legacy UI calls,
- * while delegating all data access to the decoupled UserRepository.
+ * while delegating all data access through the decoupled Service Layer
+ * ({@link haven.service.AuthService}) and underlying {@link UserRepository}.
  */
 public class UserDAO {
     private final UserRepository repository;
+    private final AuthService authService;
 
     public UserDAO() {
-        this(RepositoryProvider.getUserRepository());
+        this(RepositoryProvider.getUserRepository(), ServiceProvider.getAuthService());
     }
 
     public UserDAO(UserRepository repository) {
+        this(repository, new AuthService(repository));
+    }
+
+    public UserDAO(UserRepository repository, AuthService authService) {
         this.repository = repository;
+        this.authService = authService;
     }
 
     public boolean userExists(String username) {
-        return repository.userExists(username);
+        return authService.userExists(username);
     }
 
     public User registerUser(String username, String password, String role, String fullName, String phone,
                              String collegeName, String genderPreference, double maxBudget) throws Exception {
         if ("OWNER".equalsIgnoreCase(role)) {
-            repository.registerOwner(username, password, fullName, phone);
+            authService.registerOwner(username, password, fullName, phone);
         } else {
-            repository.registerStudent(username, password, fullName, phone, collegeName, genderPreference, maxBudget);
+            authService.registerStudent(username, password, fullName, phone, collegeName, genderPreference, maxBudget);
         }
-        return repository.findById(username).orElse(null);
+        return authService.getUser(username).orElse(null);
     }
 
     public User authenticate(String username, String password) throws AuthenticationException {
-        return repository.authenticate(username, password);
+        return authService.authenticate(username, password);
     }
 
     public void updateProfile(String username, String fullName, String phone, String collegeName, String genderPreference, double maxBudget) {
-        User u = repository.findById(username).orElse(null);
+        User u = authService.getUser(username).orElse(null);
         if (u != null) {
             u.setFullName(fullName);
             u.setPhone(phone);
@@ -51,13 +60,13 @@ public class UserDAO {
                 s.setGenderPreference(genderPreference);
                 s.setMaxBudget(maxBudget);
             }
-            repository.updateUserProfile(u);
+            authService.updateProfile(u);
         }
     }
 
     public boolean changePassword(String username, String oldPassword, String newPassword) {
         try {
-            return repository.changePassword(username, oldPassword, newPassword);
+            return authService.changePassword(username, oldPassword, newPassword);
         } catch (AuthenticationException e) {
             return false;
         }
@@ -69,5 +78,9 @@ public class UserDAO {
 
     public List<String> getWishlist(String username) {
         return repository.getWishlist(username);
+    }
+
+    public AuthService getAuthService() {
+        return authService;
     }
 }

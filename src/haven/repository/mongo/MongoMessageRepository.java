@@ -128,10 +128,8 @@ public class MongoMessageRepository implements MessageRepository {
             filters.add(Filters.eq("accommodationId", accommodationId.trim()));
         }
 
-        // Resolve conversations between student and property owner.
-        // Handles case where owner is logged in as "owner" or registered specific ownerId
-        boolean isOwnerConversation = "owner".equalsIgnoreCase(userA) || "owner".equalsIgnoreCase(userB)
-                || "OWNER_CURRENT".equalsIgnoreCase(userA) || "OWNER_CURRENT".equalsIgnoreCase(userB);
+        // Resolve whether either party has a privileged role (OWNER/ADMIN) via role lookup
+        boolean isPrivilegedConversation = isPrivilegedUser(userA) || isPrivilegedUser(userB);
 
         Bson query = filters.isEmpty() ? new Document() : Filters.and(filters);
         try (MongoCursor<Document> cursor = collection.find(query).sort(Sorts.ascending("timestamp")).iterator()) {
@@ -141,8 +139,8 @@ public class MongoMessageRepository implements MessageRepository {
                         || (m.getSenderUsername().equalsIgnoreCase(userB) && m.getReceiverUsername().equalsIgnoreCase(userA));
                 if (directMatch) {
                     list.add(m);
-                } else if (isOwnerConversation) {
-                    String studentUser = ("owner".equalsIgnoreCase(userA) || "OWNER_CURRENT".equalsIgnoreCase(userA)) ? userB : userA;
+                } else if (isPrivilegedConversation) {
+                    String studentUser = isPrivilegedUser(userA) ? userB : userA;
                     boolean aliasMatch = studentUser.equalsIgnoreCase(m.getSenderUsername()) || studentUser.equalsIgnoreCase(m.getReceiverUsername());
                     if (aliasMatch) {
                         list.add(m);
@@ -151,6 +149,14 @@ public class MongoMessageRepository implements MessageRepository {
             }
         }
         return list;
+    }
+
+    /** Checks whether a username belongs to a user with a privileged role (OWNER or ADMIN). */
+    private boolean isPrivilegedUser(String username) {
+        if (username == null) return false;
+        return RepositoryProvider.getUserRepository().findById(username)
+                .map(u -> u.getRoleEnum().isPrivileged())
+                .orElse(false);
     }
 
     @Override

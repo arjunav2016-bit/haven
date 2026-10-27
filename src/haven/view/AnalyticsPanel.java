@@ -107,8 +107,9 @@ public class AnalyticsPanel extends JPanel {
 
     public void refreshData() {
         String ownerName = (currentUser != null && currentUser.getUsername() != null) ? currentUser.getUsername() : "owner";
-        List<Accommodation> stays = hostelDAO.getAccommodationsByOwner(ownerName);
-        List<Enquiry> enquiries = enquiryDAO.getEnquiriesForOwner(ownerName);
+        haven.model.Role ownerRole = (currentUser != null) ? currentUser.getRoleEnum() : null;
+        List<Accommodation> stays = hostelDAO.getAccommodationsByOwner(ownerName, ownerRole);
+        List<Enquiry> enquiries = enquiryDAO.getEnquiriesForOwner(ownerName, ownerRole);
 
         // Calculate properties & beds
         int totalProperties = stays.size();

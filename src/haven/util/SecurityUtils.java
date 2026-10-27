@@ -97,13 +97,7 @@ public final class SecurityUtils {
             return MessageDigest.isEqual(candBytes, storedBytes);
         }
 
-        // 3. Fallback only for non-hash raw passwords (e.g. dev mock), but never match if candidate equals a hash!
-        if (!isHashed(storedPasswordOrHash)) {
-            byte[] candBytes = candidatePassword.getBytes(StandardCharsets.UTF_8);
-            byte[] storedBytes = storedPasswordOrHash.getBytes(StandardCharsets.UTF_8);
-            return MessageDigest.isEqual(candBytes, storedBytes);
-        }
-
+        // No plaintext fallback: all passwords must be stored as PBKDF2 or legacy SHA-256 hashes.
         return false;
     }
 

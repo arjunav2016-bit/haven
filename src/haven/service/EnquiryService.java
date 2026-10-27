@@ -2,6 +2,7 @@ package haven.service;
 
 import haven.model.Accommodation;
 import haven.model.Enquiry;
+import haven.model.Role;
 import haven.pattern.event.EnquiryEvent;
 import haven.pattern.event.HavenEventBus;
 import haven.repository.AccommodationRepository;
@@ -40,6 +41,11 @@ public class EnquiryService {
 
     public List<Enquiry> getEnquiriesForOwner(String ownerId) {
         return enquiryRepository.findByOwnerId(ownerId);
+    }
+
+    /** Role-aware overload: privileged roles see all enquiries. */
+    public List<Enquiry> getEnquiriesForOwner(String ownerId, Role role) {
+        return enquiryRepository.findByOwnerId(ownerId, role);
     }
 
     /**

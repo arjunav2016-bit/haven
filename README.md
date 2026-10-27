@@ -95,7 +95,7 @@ Building HAVEN pushed us well beyond standard textbook examples. Over several we
 
 ### 2. Encapsulation & Invariant Enforcement
 - All domain fields are `private` with domain-invariant validation (`baseRent > 0`, `vacancies >= 0`, `distanceKm >= 0`, `rating in [1..5]`).
-- Passwords are encrypted using SHA-256 hashing in [`SecurityUtils`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/pattern/SecurityUtils.java) and stripped from active session objects.
+- Passwords are encrypted using salted PBKDF2 hashing in [`SecurityUtils`](file:///c:/Users/minod/OneDrive/Desktop/s3/oop/project/src/haven/util/SecurityUtils.java) and stripped from active session objects.
 - Collections (`amenities`, `wishlist`, `imagePaths`, `propertyIds`) are protected via defensive copying.
 
 ### 3. Inheritance

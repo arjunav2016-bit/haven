@@ -116,9 +116,7 @@ public class MongoEnquiryRepository implements EnquiryRepository {
         List<Enquiry> list = new ArrayList<>();
         if (ownerId == null || ownerId.trim().isEmpty()) return list;
 
-        Bson filter = ("owner".equalsIgnoreCase(ownerId) || "admin".equalsIgnoreCase(ownerId))
-                ? new Document()
-                : Filters.eq("ownerId", ownerId);
+        Bson filter = Filters.eq("ownerId", ownerId);
 
         for (Document doc : collection.find(filter).sort(new Document("createdAt", -1))) {
             list.add(mapDocToEnquiry(doc));

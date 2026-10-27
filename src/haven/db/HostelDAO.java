@@ -1,39 +1,54 @@
 package haven.db;
 
 import haven.model.Accommodation;
+import haven.model.Role;
 import haven.repository.AccommodationRepository;
 import haven.repository.RepositoryProvider;
+import haven.service.AccommodationService;
+import haven.service.ServiceProvider;
 
 import java.util.List;
 
 /**
  * Adapter / Facade maintaining backward compatibility for legacy UI calls,
- * while delegating all data access to the decoupled AccommodationRepository.
+ * while delegating all data access through the decoupled Service Layer
+ * ({@link haven.service.AccommodationService}) and underlying {@link AccommodationRepository}.
  *
  * Underlying repositories publish typed events via HavenEventBus (Observer Pattern)
  * on any data mutation, enabling reactive UI synchronization across all subscribed panels.
  */
 public class HostelDAO {
     private final AccommodationRepository repository;
+    private final AccommodationService service;
 
     public HostelDAO() {
-        this(RepositoryProvider.getAccommodationRepository());
+        this(RepositoryProvider.getAccommodationRepository(), ServiceProvider.getAccommodationService());
     }
 
     public HostelDAO(AccommodationRepository repository) {
+        this(repository, new AccommodationService(repository, RepositoryProvider.getReviewRepository()));
+    }
+
+    public HostelDAO(AccommodationRepository repository, AccommodationService service) {
         this.repository = repository;
+        this.service = service;
     }
 
     public void insertAccommodation(Accommodation acc) {
-        repository.save(acc);
+        service.saveAccommodation(acc);
     }
 
     public List<Accommodation> getAllAccommodations() {
-        return repository.findAll();
+        return service.getAllAccommodations();
     }
 
     public List<Accommodation> getAccommodationsByOwner(String ownerUsername) {
         return repository.findByOwnerId(ownerUsername);
+    }
+
+    /** Role-aware overload: privileged roles see all accommodations. */
+    public List<Accommodation> getAccommodationsByOwner(String ownerUsername, Role role) {
+        return repository.findByOwnerId(ownerUsername, role);
     }
 
     public List<Accommodation> filterAccommodations(String college, String gender, double maxRent) {
@@ -45,29 +60,33 @@ public class HostelDAO {
     }
 
     public void updateVacancy(String accommodationId, int newVacancy) {
-        repository.updateVacancies(accommodationId, newVacancy);
+        service.updateVacancies(accommodationId, newVacancy);
     }
 
     public boolean decrementVacancy(String accommodationId) {
-        return repository.decrementVacancy(accommodationId);
+        return service.decrementVacancy(accommodationId);
     }
 
     public void incrementVacancy(String accommodationId) {
         Accommodation acc = getAccommodationById(accommodationId);
         if (acc != null) {
-            repository.updateVacancies(accommodationId, acc.getVacancies() + 1);
+            service.updateVacancies(accommodationId, acc.getVacancies() + 1);
         }
     }
 
     public Accommodation getAccommodationById(String accommodationId) {
-        return repository.findById(accommodationId).orElse(null);
+        return service.getAccommodationById(accommodationId).orElse(null);
     }
 
     public void deleteAccommodation(String accommodationId) {
-        repository.deleteById(accommodationId);
+        service.deleteAccommodation(accommodationId);
     }
 
     public void updateAccommodation(Accommodation acc) {
-        repository.save(acc);
+        service.saveAccommodation(acc);
+    }
+
+    public AccommodationService getService() {
+        return service;
     }
 }

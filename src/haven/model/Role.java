@@ -21,4 +21,13 @@ public enum Role {
     public boolean matches(String roleStr) {
         return name().equalsIgnoreCase(roleStr);
     }
+
+    /**
+     * Returns true for roles that should see all records (e.g. all accommodations,
+     * all enquiries) rather than only their own. Replaces the former
+     * {@code "owner".equalsIgnoreCase(username)} magic-string checks.
+     */
+    public boolean isPrivileged() {
+        return this == OWNER || this == ADMIN;
+    }
 }

@@ -96,8 +96,8 @@ public class EnquiryService {
         }
 
         boolean ok = enquiryRepository.updateEnquiryStatus(enquiryId, normalized, ownerResponse);
-        if (ok && "CANCELLED".equals(normalized)) {
-            // Restore vacancy
+        if (ok && "CANCELLED".equals(normalized) && !"CANCELLED".equals(current.getStatus())) {
+            // Restore vacancy exactly once when transitioning into CANCELLED
             accommodationRepository.findById(current.getAccommodationId()).ifPresent(acc -> {
                 accommodationRepository.updateVacancies(acc.getId(), acc.getVacancies() + 1);
             });

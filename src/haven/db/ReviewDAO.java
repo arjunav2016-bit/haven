@@ -7,11 +7,7 @@ import haven.repository.ReviewRepository;
 import java.util.List;
 
 /**
- * Adapter / Facade maintaining backward compatibility for legacy UI calls,
- * while delegating all data access to the decoupled ReviewRepository.
- *
- * Underlying repositories publish typed events via HavenEventBus (Observer Pattern)
- * on any data mutation, enabling reactive UI synchronization across all subscribed panels.
+ * Facade used by UI components to interact with review repositories.
  */
 public class ReviewDAO {
     private final ReviewRepository repository;

@@ -5,6 +5,7 @@ import haven.model.User;
 import haven.repository.RepositoryProvider;
 import haven.repository.UserRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -49,5 +50,13 @@ public class AuthService {
 
     public void updateProfile(User user) {
         userRepository.updateUserProfile(user);
+    }
+
+    public List<String> getWishlist(String username) {
+        return userRepository.getWishlist(username);
+    }
+
+    public void toggleWishlist(String username, String accommodationId) {
+        userRepository.toggleWishlist(username, accommodationId);
     }
 }

@@ -81,7 +81,10 @@ public class InMemoryEnquiryRepository implements EnquiryRepository {
 
     @Override
     public boolean updateEnquiryStatus(String enquiryId, String newStatus, String ownerResponse) {
-        store.updateEnquiryStatus(enquiryId, newStatus, ownerResponse);
+        boolean updated = store.updateEnquiryStatus(enquiryId, newStatus, ownerResponse);
+        if (!updated) {
+            return false;
+        }
         findById(enquiryId).ifPresent(eq -> {
             HavenEventBus.getInstance().publish(new EnquiryEvent(EnquiryEvent.Type.STATUS_UPDATED, eq));
             Notification n = new Notification(

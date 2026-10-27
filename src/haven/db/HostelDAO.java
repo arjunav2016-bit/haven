@@ -10,12 +10,7 @@ import haven.service.ServiceProvider;
 import java.util.List;
 
 /**
- * Adapter / Facade maintaining backward compatibility for legacy UI calls,
- * while delegating all data access through the decoupled Service Layer
- * ({@link haven.service.AccommodationService}) and underlying {@link AccommodationRepository}.
- *
- * Underlying repositories publish typed events via HavenEventBus (Observer Pattern)
- * on any data mutation, enabling reactive UI synchronization across all subscribed panels.
+ * Facade used by UI components to interact with accommodation services and repositories.
  */
 public class HostelDAO {
     private final AccommodationRepository repository;
@@ -32,6 +27,10 @@ public class HostelDAO {
     public HostelDAO(AccommodationRepository repository, AccommodationService service) {
         this.repository = repository;
         this.service = service;
+    }
+
+    public HostelDAO(AccommodationService service) {
+        this(RepositoryProvider.getAccommodationRepository(), service);
     }
 
     public void insertAccommodation(Accommodation acc) {

@@ -394,7 +394,19 @@ public class OwnerDashboardPanel extends JPanel {
                 return;
             }
             Enquiry eq = currentEnquiries.get(row);
-            enquiryDAO.updateStatus(eq.getEnquiryId(), "CONTACTED");
+            if ("DECLINED".equalsIgnoreCase(eq.getStatus()) || "CANCELLED".equalsIgnoreCase(eq.getStatus())) {
+                JOptionPane.showMessageDialog(this, "Cannot contact an enquiry that has already been " + eq.getStatus().toLowerCase() + ".", "Information", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            if ("CONFIRMED".equalsIgnoreCase(eq.getStatus())) {
+                JOptionPane.showMessageDialog(this, "This booking has already been confirmed.", "Information", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            boolean ok = enquiryDAO.updateStatus(eq.getEnquiryId(), "CONTACTED");
+            if (!ok) {
+                JOptionPane.showMessageDialog(this, "Cannot transition enquiry from " + eq.getStatus() + " to CONTACTED.", "Invalid Transition", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             refreshEnquiriesTable();
             if (onDataChanged != null) onDataChanged.run();
         });
@@ -416,7 +428,11 @@ public class OwnerDashboardPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Cannot confirm an enquiry that has already been declined.", "Declined Enquiry", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            enquiryDAO.updateStatus(eq.getEnquiryId(), "CONFIRMED");
+            boolean ok = enquiryDAO.updateStatus(eq.getEnquiryId(), "CONFIRMED");
+            if (!ok) {
+                JOptionPane.showMessageDialog(this, "Cannot transition enquiry from " + eq.getStatus() + " to CONFIRMED.", "Invalid Transition", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             JOptionPane.showMessageDialog(this, "Booking confirmed for " + eq.getStudentUsername() + "!", "Confirmed", JOptionPane.INFORMATION_MESSAGE);
             refreshEnquiriesTable();
             if (onDataChanged != null) onDataChanged.run();
@@ -444,7 +460,11 @@ public class OwnerDashboardPanel extends JPanel {
                     JOptionPane.QUESTION_MESSAGE);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                enquiryDAO.updateStatus(eq.getEnquiryId(), "DECLINED");
+                boolean ok = enquiryDAO.updateStatus(eq.getEnquiryId(), "DECLINED");
+                if (!ok) {
+                    JOptionPane.showMessageDialog(this, "Cannot transition enquiry from " + eq.getStatus() + " to DECLINED.", "Invalid Transition", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
                 dao.incrementVacancy(eq.getAccommodationId());
                 JOptionPane.showMessageDialog(this, "Enquiry marked as DECLINED and 1 vacancy restored.", "Vacancy Restored", JOptionPane.INFORMATION_MESSAGE);
                 refreshTable();

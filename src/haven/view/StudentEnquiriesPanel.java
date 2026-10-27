@@ -370,8 +370,14 @@ public class StudentEnquiriesPanel extends JPanel {
                 JOptionPane.QUESTION_MESSAGE);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            enquiryDAO.updateStatus(eq.getEnquiryId(), "CANCELLED");
-            hostelDAO.incrementVacancy(eq.getAccommodationId());
+            boolean ok = enquiryDAO.updateStatus(eq.getEnquiryId(), "CANCELLED");
+            if (!ok) {
+                JOptionPane.showMessageDialog(this,
+                        "Cannot withdraw enquiry from its current status (" + eq.getStatus() + ").",
+                        "Invalid Transition",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             JOptionPane.showMessageDialog(this,
                     "Enquiry withdrawn successfully! The room vacancy has been restored.",
                     "Enquiry Withdrawn",

@@ -11,12 +11,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Adapter / Facade maintaining backward compatibility for legacy UI calls,
- * while delegating all data access through the decoupled Service Layer
- * ({@link haven.service.EnquiryService}) and underlying {@link EnquiryRepository}.
- *
- * Underlying repositories publish typed events via HavenEventBus (Observer Pattern)
- * on any data mutation, enabling reactive UI synchronization across all subscribed panels.
+ * Facade used by UI components to interact with enquiry services and repositories.
  */
 public class EnquiryDAO {
     private final EnquiryRepository repository;
@@ -33,6 +28,10 @@ public class EnquiryDAO {
     public EnquiryDAO(EnquiryRepository repository, EnquiryService service) {
         this.repository = repository;
         this.service = service;
+    }
+
+    public EnquiryDAO(EnquiryService service) {
+        this(RepositoryProvider.getEnquiryRepository(), service);
     }
 
     public void saveEnquiry(String accId, String accName, String studentUsername, String studentPhone, String message) {
@@ -61,15 +60,12 @@ public class EnquiryDAO {
         return service.getEnquiriesForStudent(studentUsername);
     }
 
-    public void updateStatus(String enquiryId, String newStatus) {
-        updateStatus(enquiryId, newStatus, "");
+    public boolean updateStatus(String enquiryId, String newStatus) {
+        return updateStatus(enquiryId, newStatus, "");
     }
 
-    public void updateStatus(String enquiryId, String newStatus, String ownerResponse) {
-        boolean handled = service.updateEnquiryStatus(enquiryId, newStatus, ownerResponse);
-        if (!handled) {
-            repository.updateEnquiryStatus(enquiryId, newStatus, ownerResponse);
-        }
+    public boolean updateStatus(String enquiryId, String newStatus, String ownerResponse) {
+        return service.updateEnquiryStatus(enquiryId, newStatus, ownerResponse);
     }
 
     public void deleteEnquiry(String enquiryId) {

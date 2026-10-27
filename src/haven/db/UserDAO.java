@@ -10,9 +10,7 @@ import haven.service.ServiceProvider;
 import java.util.List;
 
 /**
- * Adapter / Facade maintaining backward compatibility for legacy UI calls,
- * while delegating all data access through the decoupled Service Layer
- * ({@link haven.service.AuthService}) and underlying {@link UserRepository}.
+ * Facade used by UI components to interact with authentication services and user repositories.
  */
 public class UserDAO {
     private final UserRepository repository;
@@ -29,6 +27,10 @@ public class UserDAO {
     public UserDAO(UserRepository repository, AuthService authService) {
         this.repository = repository;
         this.authService = authService;
+    }
+
+    public UserDAO(AuthService authService) {
+        this(RepositoryProvider.getUserRepository(), authService);
     }
 
     public boolean userExists(String username) {

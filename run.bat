@@ -7,7 +7,8 @@ javac -encoding UTF-8 -d bin -cp "lib/*" @sources.txt
 del sources.txt
 if %ERRORLEVEL% equ 0 (
     echo Launching Haven...
-    java -Dfile.encoding=UTF-8 -cp "bin;lib/*" haven.Main
+    :: -Dhaven.seed=true seeds demo accounts (student/owner/admin) for demo use
+    java -Dfile.encoding=UTF-8 -Dhaven.seed=true -cp "bin;lib/*" haven.Main
 ) else (
     echo Compilation failed.
     pause

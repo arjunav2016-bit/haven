@@ -483,26 +483,28 @@ public class InMemoryStore {
         return getEnquiriesForOwner(ownerUsername);
     }
 
-    public synchronized void updateEnquiryStatus(String enquiryId, String status) {
-        updateEnquiryStatus(enquiryId, status, "");
+    public synchronized boolean updateEnquiryStatus(String enquiryId, String status) {
+        return updateEnquiryStatus(enquiryId, status, "");
     }
 
-    public synchronized void updateEnquiryStatus(String enquiryId, String status, String ownerResponse) {
+    public synchronized boolean updateEnquiryStatus(String enquiryId, String status, String ownerResponse) {
+        if (enquiryId == null || status == null) return false;
+        String normalizedStatus = status.trim().toUpperCase();
         for (int i = 0; i < enquiries.size(); i++) {
             Enquiry eq = enquiries.get(i);
-            if (eq.getEnquiryId().equalsIgnoreCase(enquiryId)) {
-                String resp = (ownerResponse != null && !ownerResponse.trim().isEmpty()) ? ownerResponse : eq.getOwnerResponse();
-                // Validate state transition via State Pattern if possible
-                if (eq.canTransitionTo(status)) {
-                    eq.transitionTo(status);
+            if (eq.getEnquiryId().equalsIgnoreCase(enquiryId.trim())) {
+                if (!eq.canTransitionTo(normalizedStatus)) {
+                    return false;
                 }
+                String resp = (ownerResponse != null && !ownerResponse.trim().isEmpty()) ? ownerResponse : eq.getOwnerResponse();
                 enquiries.set(i, new Enquiry(eq.getEnquiryId(), eq.getAccommodationId(), eq.getAccommodationName(),
                         eq.getOwnerId(), eq.getStudentUsername(), eq.getStudentPhone(), eq.getMessage(),
-                        status.toUpperCase(), eq.getCreatedAt(), resp));
+                        normalizedStatus, eq.getCreatedAt(), resp));
                 persist();
-                return;
+                return true;
             }
         }
+        return false;
     }
 
     public synchronized void deleteEnquiry(String enquiryId) {

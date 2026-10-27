@@ -12,12 +12,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Utility service managing on-disk storage of property photographs in the local {@code images/} directory.
  * Also generates default architectural preview images on disk for seeded properties when none exist.
  */
 public final class PropertyImageStorage {
+    private static final Logger LOGGER = Logger.getLogger(PropertyImageStorage.class.getName());
     public static final String IMAGES_ROOT_DIR = "images";
     private static final java.util.Map<String, javax.swing.ImageIcon> ICON_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
 
@@ -195,7 +198,8 @@ public final class PropertyImageStorage {
         g2.dispose();
         try {
             ImageIO.write(img, "png", outFile);
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Failed to write sample image to " + outFile.getAbsolutePath(), e);
         }
     }
 
@@ -220,7 +224,8 @@ public final class PropertyImageStorage {
             javax.swing.ImageIcon icon = new javax.swing.ImageIcon(scaled);
             ICON_CACHE.put(cacheKey, icon);
             return icon;
-        } catch (Exception e) {
+        } catch (IOException | RuntimeException e) {
+            LOGGER.log(Level.FINE, "Failed to load and scale image from " + path, e);
             return null;
         }
     }

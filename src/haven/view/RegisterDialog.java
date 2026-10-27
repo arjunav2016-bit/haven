@@ -8,11 +8,14 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * RegisterDialog - Create Account portal styled with HavenTheme.
  */
 public class RegisterDialog extends JDialog {
+    private static final Logger LOGGER = Logger.getLogger(RegisterDialog.class.getName());
     private final UserDAO userDAO;
     private User registeredUser;
 
@@ -250,7 +253,11 @@ public class RegisterDialog extends JDialog {
                     "Registration Complete",
                     JOptionPane.INFORMATION_MESSAGE);
             dispose();
+        } catch (IllegalArgumentException ex) {
+            LOGGER.log(Level.WARNING, "Registration validation error: " + ex.getMessage(), ex);
+            showError("Registration failed: " + ex.getMessage());
         } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Unexpected error during registration for user " + username, ex);
             showError("Registration failed: " + ex.getMessage());
         }
     }

@@ -7,6 +7,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * SecurityUtils - Cryptographic password hashing and verification utility.
@@ -23,6 +25,7 @@ public final class SecurityUtils {
     private static final int KEY_LENGTH = 256;
     private static final int SALT_BYTES = 16;
     private static final SecureRandom RANDOM = new SecureRandom();
+    private static final Logger LOGGER = Logger.getLogger(SecurityUtils.class.getName());
 
     private SecurityUtils() {}
 
@@ -82,7 +85,8 @@ public final class SecurityUtils {
                     byte[] candidateHash = skf.generateSecret(spec).getEncoded();
 
                     return MessageDigest.isEqual(candidateHash, expectedHash);
-                } catch (Exception e) {
+                } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+                    LOGGER.log(Level.WARNING, "PBKDF2 verification failed", e);
                     return false;
                 }
             }

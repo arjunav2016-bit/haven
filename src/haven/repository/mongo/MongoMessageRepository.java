@@ -18,6 +18,8 @@ import org.bson.conversions.Bson;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * MongoMessageRepository.java
@@ -31,6 +33,7 @@ import java.util.Optional;
  * - Creates a Notification record so recipient sees unread badge count
  */
 public class MongoMessageRepository implements MessageRepository {
+    private static final Logger LOGGER = Logger.getLogger(MongoMessageRepository.class.getName());
     private final MongoCollection<Document> collection;
 
     public MongoMessageRepository() {
@@ -64,7 +67,8 @@ public class MongoMessageRepository implements MessageRepository {
                         entity.getAccommodationId()
                 );
                 RepositoryProvider.getNotificationRepository().save(notif);
-            } catch (Exception ignored) {
+            } catch (RuntimeException e) {
+                LOGGER.log(Level.WARNING, "Failed to send chat notification to " + entity.getReceiverUsername(), e);
             }
         }
         return entity;

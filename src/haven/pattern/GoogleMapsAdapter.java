@@ -1,15 +1,21 @@
 package haven.pattern;
 
 import java.awt.Desktop;
+import java.awt.HeadlessException;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GoogleMapsAdapter implements NavigationService {
+    private static final Logger LOGGER = Logger.getLogger(GoogleMapsAdapter.class.getName());
 
     @Override
     public void navigateTo(String locationLink) {
         try {
             if (locationLink == null || locationLink.trim().isEmpty()) {
-                System.err.println("No location link available to navigate.");
+                LOGGER.warning("No location link available to navigate.");
                 javax.swing.JOptionPane.showMessageDialog(null,
                         "No geographic location link is available for this property.",
                         "Navigation Notice",
@@ -25,7 +31,8 @@ public class GoogleMapsAdapter implements NavigationService {
             } else {
                 fallbackToClipboard(url, "Desktop browser navigation is not supported in this environment.");
             }
-        } catch (Exception e) {
+        } catch (IOException | URISyntaxException | RuntimeException e) {
+            LOGGER.log(Level.WARNING, "Failed to launch browser navigation: " + e.getMessage(), e);
             fallbackToClipboard(locationLink, "Could not launch system browser: " + e.getMessage());
         }
     }
@@ -40,8 +47,10 @@ public class GoogleMapsAdapter implements NavigationService {
                         "Maps Navigation Fallback",
                         javax.swing.JOptionPane.INFORMATION_MESSAGE);
             }
-        } catch (Exception ex) {
-            System.err.println("Clipboard fallback error: " + ex.getMessage());
+        } catch (HeadlessException | IllegalStateException ex) {
+            LOGGER.log(Level.WARNING, "Clipboard access unavailable: " + ex.getMessage(), ex);
+        } catch (RuntimeException ex) {
+            LOGGER.log(Level.WARNING, "Clipboard fallback error: " + ex.getMessage(), ex);
         }
     }
 

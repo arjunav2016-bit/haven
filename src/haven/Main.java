@@ -7,8 +7,11 @@ import haven.view.LoginDialog;
 import haven.view.MainFrame;
 
 import javax.swing.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main {
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
     public static void main(String[] args) {
         // Enable subpixel anti-aliasing for text rendering across Swing
         System.setProperty("awt.useSystemAAFontSettings", "on");
@@ -16,7 +19,9 @@ public class Main {
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ignored) {}
+        } catch (Exception ex) {
+            LOGGER.log(Level.FINE, "Could not set system look-and-feel", ex);
+        }
 
         SwingUtilities.invokeLater(() -> {
             // Background initialization worker
@@ -31,10 +36,12 @@ public class Main {
                     boolean mongoOnline = false;
                     try {
                         mongoOnline = get();
-                    } catch (Exception ignored) {}
+                    } catch (Exception ex) {
+                        LOGGER.log(Level.FINE, "Error checking MongoDB connection", ex);
+                    }
 
                     if (!mongoOnline) {
-                        System.out.println("[HAVEN] MongoDB offline on localhost:27017. Prompting for offline mode...");
+                        LOGGER.info("MongoDB offline on localhost:27017. Prompting for offline mode...");
                         int choice = JOptionPane.showOptionDialog(null,
                                 "<html><body style='width: 340px; padding: 5px;'>" +
                                 "<h3 style='color: #4F46E5; margin-top: 0;'>MongoDB Offline on localhost:27017</h3>" +
@@ -59,13 +66,13 @@ public class Main {
                             return;
                         }
                     } else {
-                        System.out.println("[HAVEN] Connected to MongoDB (localhost:27017).");
+                        LOGGER.info("Connected to MongoDB (localhost:27017).");
                     }
 
                     RepositoryProvider.initialize();
-                    System.out.println("[HAVEN] Abstract Factory & Repositories initialized.");
+                    LOGGER.info("Abstract Factory & Repositories initialized.");
 
-                    System.out.println("[HAVEN] Opening Login Portal window on your screen...");
+                    LOGGER.info("Opening Login Portal window...");
                     LoginDialog login = new LoginDialog(null);
                     login.toFront();
                     login.requestFocus();
@@ -73,13 +80,13 @@ public class Main {
 
                     User authenticatedUser = login.getAuthenticatedUser();
                     if (authenticatedUser != null) {
-                        System.out.println("[HAVEN] Logged in as: " + authenticatedUser.getUsername() + " [" + authenticatedUser.getRole() + "]");
+                        LOGGER.info("Logged in as: " + authenticatedUser.getUsername() + " [" + authenticatedUser.getRole() + "]");
                         MainFrame frame = new MainFrame(authenticatedUser);
                         frame.toFront();
                         frame.requestFocus();
                         frame.setVisible(true);
                     } else {
-                        System.out.println("[HAVEN] Login dismissed. Exiting application.");
+                        LOGGER.info("Login dismissed. Exiting application.");
                         System.exit(0);
                     }
                 }

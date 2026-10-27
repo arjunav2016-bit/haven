@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * MapPanel - Embedded Interactive Map View powered by JXMapViewer2 and OpenStreetMap tiles.
@@ -45,6 +47,7 @@ import java.util.Map;
  * - Quick Campus Jump selector (SCTCE, CET, GEC Barton Hill, MBCET, LBS)
  */
 public class MapPanel extends JPanel {
+    private static final Logger LOGGER = Logger.getLogger(MapPanel.class.getName());
     private final HostelDAO hostelDAO;
     private final UserDAO userDAO;
     private final EnquiryDAO enquiryDAO;
@@ -157,10 +160,12 @@ public class MapPanel extends JPanel {
             tileFactory.setThreadPoolSize(4);
             mapViewer.setTileFactory(tileFactory);
         } catch (Exception ex) {
-            System.err.println("[MapPanel] Notice: Initializing offline fallback map tile factory: " + ex.getMessage());
+            LOGGER.log(Level.INFO, "Initializing offline fallback map tile factory: " + ex.getMessage(), ex);
             try {
                 mapViewer.setTileFactory(new EmptyTileFactory());
-            } catch (Exception ignored) {}
+            } catch (RuntimeException e) {
+                LOGGER.log(Level.WARNING, "Failed to set EmptyTileFactory", e);
+            }
         }
 
         // Default center: SCTCE Pappanamcode

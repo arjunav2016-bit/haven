@@ -18,11 +18,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * MongoDB concrete implementation of EnquiryRepository.
  */
 public class MongoEnquiryRepository implements EnquiryRepository {
+    private static final Logger LOGGER = Logger.getLogger(MongoEnquiryRepository.class.getName());
     private final MongoCollection<Document> collection;
 
     public MongoEnquiryRepository() {
@@ -63,7 +66,8 @@ public class MongoEnquiryRepository implements EnquiryRepository {
                     saved.getEnquiryId()
             );
             RepositoryProvider.getNotificationRepository().save(notif);
-        } catch (Exception ignored) {
+        } catch (RuntimeException e) {
+            LOGGER.log(Level.WARNING, "Failed to send notification for enquiry: " + saved.getEnquiryId(), e);
         }
         return saved;
     }
@@ -161,7 +165,8 @@ public class MongoEnquiryRepository implements EnquiryRepository {
                             eq.getEnquiryId()
                     );
                     RepositoryProvider.getNotificationRepository().save(notif);
-                } catch (Exception ignored) {
+                } catch (RuntimeException e) {
+                    LOGGER.log(Level.WARNING, "Failed to send update notification for enquiry: " + eq.getEnquiryId(), e);
                 }
             });
             return true;

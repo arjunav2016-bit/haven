@@ -17,11 +17,14 @@ import org.bson.conversions.Bson;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * MongoDB concrete implementation of AccommodationRepository.
  */
 public class MongoAccommodationRepository implements AccommodationRepository {
+    private static final Logger LOGGER = Logger.getLogger(MongoAccommodationRepository.class.getName());
     private final MongoCollection<Document> collection;
 
     public MongoAccommodationRepository() {
@@ -360,7 +363,9 @@ public class MongoAccommodationRepository implements AccommodationRepository {
         } else if (val instanceof String) {
             try {
                 return Double.parseDouble(((String) val).trim());
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+                LOGGER.log(Level.FINE, "Failed to parse document double for key: " + key, ignored);
+            }
         }
         return defaultValue;
     }

@@ -4,12 +4,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Thread-safe EventBus implementing the Observer Pattern for HAVEN.
  * Decouples views and data services by allowing reactive event publishing and subscription.
  */
 public class HavenEventBus {
+    private static final Logger LOGGER = Logger.getLogger(HavenEventBus.class.getName());
     private static volatile HavenEventBus instance;
 
     private final Map<Class<? extends HavenEvent>, List<HavenEventListener<?>>> listeners = new ConcurrentHashMap<>();
@@ -57,7 +60,7 @@ public class HavenEventBus {
                     try {
                         ((HavenEventListener<HavenEvent>) rawListener).onEvent(event);
                     } catch (Exception e) {
-                        System.err.println("[HavenEventBus] Error in listener execution: " + e.getMessage());
+                        LOGGER.log(Level.SEVERE, "Error in listener execution for event " + event.getClass().getSimpleName(), e);
                     }
                 }
             }

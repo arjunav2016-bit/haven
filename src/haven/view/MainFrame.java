@@ -20,6 +20,8 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -28,6 +30,7 @@ import java.util.stream.Collectors;
  * Uses PanelMediator for panel switching and HavenEventBus for live updates.
  */
 public class MainFrame extends JFrame implements PanelMediator {
+    private static final Logger LOGGER = Logger.getLogger(MainFrame.class.getName());
     private final AccommodationRepository accommodationRepo;
     private final UserRepository userRepo;
     private final EnquiryRepository enquiryRepo;
@@ -757,13 +760,21 @@ public class MainFrame extends JFrame implements PanelMediator {
         double minRent = 0;
         String minRentText = minRentField.getText().trim();
         if (!minRentText.isEmpty()) {
-            try { minRent = Double.parseDouble(minRentText); } catch (NumberFormatException ignored) {}
+            try {
+                minRent = Double.parseDouble(minRentText);
+            } catch (NumberFormatException ignored) {
+                LOGGER.log(Level.FINE, "Failed to parse filter min rent: " + minRentText, ignored);
+            }
         }
 
         double maxRent = 0;
         String rentText = rentField.getText().trim();
         if (!rentText.isEmpty()) {
-            try { maxRent = Double.parseDouble(rentText); } catch (NumberFormatException ignored) {}
+            try {
+                maxRent = Double.parseDouble(rentText);
+            } catch (NumberFormatException ignored) {
+                LOGGER.log(Level.FINE, "Failed to parse filter max rent: " + rentText, ignored);
+            }
         }
 
         double maxDistance = 0;

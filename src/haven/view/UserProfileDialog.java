@@ -8,12 +8,15 @@ import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * UserProfileDialog - View and edit account profile and student stay preferences.
  * Styled using HavenTheme design constants.
  */
 public class UserProfileDialog extends JDialog {
+    private static final Logger LOGGER = Logger.getLogger(UserProfileDialog.class.getName());
     private final User currentUser;
     private final UserDAO userDAO;
     private final Runnable onProfileUpdated;
@@ -200,7 +203,9 @@ public class UserProfileDialog extends JDialog {
         if (budgetField != null && !budgetField.getText().trim().isEmpty()) {
             try {
                 budget = Double.parseDouble(budgetField.getText().trim());
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+                LOGGER.log(Level.FINE, "Failed to parse user profile budget: " + budgetField.getText(), ignored);
+            }
         }
 
         userDAO.updateProfile(currentUser.getUsername(), name, phone, college, gender, budget);

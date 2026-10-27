@@ -2,14 +2,18 @@ package haven.pattern;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MongoDBConnection {
+    private static final Logger LOGGER = Logger.getLogger(MongoDBConnection.class.getName());
     private static volatile MongoDBConnection instance;
     private final MongoClient mongoClient;
     private final MongoDatabase database;
@@ -56,7 +60,11 @@ public class MongoDBConnection {
         try {
             database.runCommand(new Document("ping", 1));
             return true;
-        } catch (Exception e) {
+        } catch (MongoException e) {
+            LOGGER.log(Level.FINE, "MongoDB ping connection test failed: {0}", e.getMessage());
+            return false;
+        } catch (RuntimeException e) {
+            LOGGER.log(Level.FINE, "Unexpected error during MongoDB ping test: {0}", e.getMessage());
             return false;
         }
     }
@@ -65,7 +73,9 @@ public class MongoDBConnection {
         if (mongoClient != null) {
             try {
                 mongoClient.close();
-            } catch (Exception ignored) {}
+            } catch (RuntimeException e) {
+                LOGGER.log(Level.WARNING, "Error closing MongoDB client", e);
+            }
         }
     }
 }

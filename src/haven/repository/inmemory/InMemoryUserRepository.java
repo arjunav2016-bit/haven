@@ -8,11 +8,14 @@ import haven.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * In-Memory &amp; File-backed implementation of {@link UserRepository}.
  */
 public class InMemoryUserRepository implements UserRepository {
+    private static final Logger LOGGER = Logger.getLogger(InMemoryUserRepository.class.getName());
     private final InMemoryStore store;
 
     public InMemoryUserRepository() {
@@ -67,7 +70,10 @@ public class InMemoryUserRepository implements UserRepository {
                                 String collegeName, String genderPreference, double maxBudget) {
         try {
             store.registerUser(username, rawPassword, "STUDENT", fullName, phone, collegeName, genderPreference, maxBudget);
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to register student: " + username, e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -76,7 +82,10 @@ public class InMemoryUserRepository implements UserRepository {
     public void registerOwner(String username, String rawPassword, String fullName, String phone) {
         try {
             store.registerUser(username, rawPassword, "OWNER", fullName, phone, null, null, 0);
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to register owner: " + username, e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }

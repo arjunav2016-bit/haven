@@ -8,12 +8,14 @@ import haven.pattern.PropertyImageStorage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * SeedData - Initializes HAVEN with SCTCE 2026 college-approved hostels and PGs
  * constructed via the fluent Builder Pattern ({@link Hostel#builder()} and {@link PG#builder()}).
  */
 public class SeedData {
+    private static final Logger LOGGER = Logger.getLogger(SeedData.class.getName());
 
     private static void applyAmenities(Accommodation acc, boolean cctv, boolean study) {
         acc.addAmenity("WiFi");
@@ -345,7 +347,7 @@ public class SeedData {
     }
 
     public static void main(String[] args) {
-        System.out.println("Connecting to MongoDB and seeding SCTCE 2026 approved hostels data...");
+        LOGGER.info("Connecting to MongoDB and seeding SCTCE 2026 approved hostels data...");
         HostelDAO dao = new HostelDAO();
 
         MongoDBConnection.getInstance().getDatabase().getCollection("hostels").drop();
@@ -355,7 +357,7 @@ public class SeedData {
             dao.insertAccommodation(acc);
         }
 
-        System.out.println("Database successfully seeded with " + approvedListings.size() + " SCTCE approved accommodations (7 Boys + 9 Girls)!");
+        LOGGER.info(() -> "Database successfully seeded with " + approvedListings.size() + " SCTCE approved accommodations (7 Boys + 9 Girls)!");
         MongoDBConnection.getInstance().close();
     }
 }

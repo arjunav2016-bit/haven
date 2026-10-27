@@ -1,13 +1,18 @@
 package haven.pattern;
 
 import java.awt.Desktop;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.function.BiConsumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Adapter Pattern: Concrete Adapter for OpenStreetMap navigation and embedded JXMapViewer2 centering.
  */
 public class OpenStreetMapAdapter implements NavigationService {
+    private static final Logger LOGGER = Logger.getLogger(OpenStreetMapAdapter.class.getName());
 
     private final BiConsumer<Double, Double> embeddedMapConsumer;
 
@@ -30,8 +35,8 @@ public class OpenStreetMapAdapter implements NavigationService {
             if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                 Desktop.getDesktop().browse(new URI(url));
             }
-        } catch (Exception e) {
-            System.err.println("[OpenStreetMapAdapter] Navigation error: " + e.getMessage());
+        } catch (IOException | URISyntaxException | RuntimeException e) {
+            LOGGER.log(Level.WARNING, "OpenStreetMap navigation error: " + e.getMessage(), e);
         }
     }
 

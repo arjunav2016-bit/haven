@@ -15,11 +15,14 @@ import org.bson.Document;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * MongoDB concrete implementation of NotificationRepository.
  */
 public class MongoNotificationRepository implements NotificationRepository {
+    private static final Logger LOGGER = Logger.getLogger(MongoNotificationRepository.class.getName());
     private final MongoCollection<Document> collection;
 
     public MongoNotificationRepository() {
@@ -141,6 +144,7 @@ public class MongoNotificationRepository implements NotificationRepository {
             try {
                 type = Notification.Type.valueOf(typeStr.toUpperCase());
             } catch (IllegalArgumentException ignored) {
+                LOGGER.log(Level.FINE, "Unknown notification type string in DB: " + typeStr, ignored);
             }
         }
         return new Notification(

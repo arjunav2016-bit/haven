@@ -20,6 +20,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * ListingCardPanel - Modern Three-Column Card Component for Accommodations.
@@ -29,6 +31,7 @@ import java.util.function.Consumer;
  * - Right pricing callout and action column (Enquire & Book, Direct Chat, Map, Wishlist)
  */
 public class ListingCardPanel extends JPanel {
+    private static final Logger LOGGER = Logger.getLogger(ListingCardPanel.class.getName());
     private final Accommodation accommodation;
     private final HostelDAO hostelDAO;
     private final UserDAO userDAO;
@@ -106,7 +109,9 @@ public class ListingCardPanel extends JPanel {
         // =========================================================================
         try {
             PropertyImageStorage.ensureDefaultImagesForAccommodation(accommodation);
-        } catch (Exception ignored) {}
+        } catch (RuntimeException ignored) {
+            LOGGER.log(Level.FINE, "Failed to ensure default images for accommodation " + accommodation.getId(), ignored);
+        }
         List<String> imgPaths = accommodation.getImagePaths();
         String primaryImg = imgPaths.isEmpty() ? null : imgPaths.get(0);
 
@@ -613,7 +618,8 @@ public class ListingCardPanel extends JPanel {
                 try {
                     String username = (currentUser != null && currentUser.isStudent()) ? currentUser.getUsername() : "student";
                     enquiryDAO.saveEnquiry(accommodation.getId(), accommodation.getName(), accommodation.getOwnerId(), username, phone, message);
-                } catch (Exception ex) {
+                } catch (RuntimeException ex) {
+                    LOGGER.log(Level.WARNING, "Failed to save enquiry, rolling back vacancy for " + accommodation.getId(), ex);
                     hostelDAO.incrementVacancy(accommodation.getId());
                     Accommodation rolledBack = hostelDAO.getAccommodationById(accommodation.getId());
                     if (rolledBack != null) {
@@ -629,8 +635,10 @@ public class ListingCardPanel extends JPanel {
                 }
                 if (onStateChanged != null) onStateChanged.run();
             } catch (haven.exception.VacancyExhaustedException ex) {
+                LOGGER.log(Level.INFO, "Booking rejected: vacancy exhausted for {0}", accommodation.getId());
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Vacancy Unavailable", JOptionPane.WARNING_MESSAGE);
-            } catch (Exception ex) {
+            } catch (RuntimeException ex) {
+                LOGGER.log(Level.SEVERE, "Failed to submit enquiry for " + accommodation.getId(), ex);
                 JOptionPane.showMessageDialog(this, "Failed to submit enquiry: " + ex.getMessage(), "Booking Error", JOptionPane.ERROR_MESSAGE);
             }
         }

@@ -134,11 +134,7 @@ public abstract class Accommodation {
         if (!lower.contains("trivandrum") && !lower.contains("thiruvananthapuram")) {
             query.append(", Thiruvananthapuram");
         }
-        try {
-            return "https://www.google.com/maps/search/?api=1&query=" + URLEncoder.encode(query.toString(), StandardCharsets.UTF_8.toString());
-        } catch (Exception e) {
-            return "https://www.google.com/maps/search/?api=1&query=" + query.toString().replace(" ", "+");
-        }
+        return "https://www.google.com/maps/search/?api=1&query=" + URLEncoder.encode(query.toString(), StandardCharsets.UTF_8);
     }
 
     public double getLatitude() { return latitude; }

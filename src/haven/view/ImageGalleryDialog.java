@@ -15,8 +15,11 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * ImageGalleryDialog - Interactive photo gallery and carousel viewer for an Accommodation.
@@ -27,6 +30,7 @@ import java.util.List;
  * - Owner / Admin "Upload Photo" action using JFileChooser + PropertyImageStorage
  */
 public class ImageGalleryDialog extends JDialog {
+    private static final Logger LOGGER = Logger.getLogger(ImageGalleryDialog.class.getName());
     private final Accommodation accommodation;
     private final User currentUser;
     private final Runnable onImagesUpdated;
@@ -303,7 +307,14 @@ public class ImageGalleryDialog extends JDialog {
                                 "Upload Complete",
                                 JOptionPane.INFORMATION_MESSAGE);
                     }
-                } catch (Exception ex) {
+                } catch (IOException ex) {
+                    LOGGER.log(Level.WARNING, "Failed to upload image file: " + selectedFile.getName(), ex);
+                    JOptionPane.showMessageDialog(this,
+                            "Failed to upload image: " + ex.getMessage(),
+                            "Upload Error",
+                            JOptionPane.ERROR_MESSAGE);
+                } catch (RuntimeException ex) {
+                    LOGGER.log(Level.SEVERE, "Unexpected error uploading image: " + selectedFile.getName(), ex);
                     JOptionPane.showMessageDialog(this,
                             "Failed to upload image: " + ex.getMessage(),
                             "Upload Error",

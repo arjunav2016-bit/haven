@@ -4,12 +4,16 @@ import haven.pattern.MongoDBConnection;
 import haven.repository.inmemory.InMemoryRepositoryFactory;
 import haven.repository.mongo.MongoRepositoryFactory;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Service Locator and Factory Provider for managing repository access across HAVEN.
  * Automatically resolves between MongoRepositoryFactory and InMemoryRepositoryFactory
  * based on MongoDB availability.
  */
 public class RepositoryProvider {
+    private static final Logger LOGGER = Logger.getLogger(RepositoryProvider.class.getName());
     private static volatile RepositoryFactory factory;
 
     private RepositoryProvider() {}
@@ -32,8 +36,8 @@ public class RepositoryProvider {
         } else {
             try {
                 factory = new MongoRepositoryFactory();
-            } catch (Exception e) {
-                System.err.println("[RepositoryProvider] Failed to initialize MongoRepositoryFactory: " + e.getMessage());
+            } catch (RuntimeException e) {
+                LOGGER.log(Level.WARNING, "Failed to initialize MongoRepositoryFactory, falling back to in-memory", e);
                 MongoDBConnection.getInstance().setOfflineMode(true);
                 factory = new InMemoryRepositoryFactory();
             }

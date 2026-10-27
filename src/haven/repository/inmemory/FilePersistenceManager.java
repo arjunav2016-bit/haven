@@ -5,11 +5,14 @@ import haven.pattern.PropertyImageStorage;
 import org.bson.Document;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Handles transparent offline persistence to 'data/haven_store.json'.
@@ -17,6 +20,7 @@ import java.util.*;
  * providing zero-dependency local JSON file persistence across all 7 domain entities.
  */
 public class FilePersistenceManager {
+    private static final Logger LOGGER = Logger.getLogger(FilePersistenceManager.class.getName());
     private static final String DATA_DIR = "data";
     private static final String STORE_PATH = "data/haven_store.json";
 
@@ -207,8 +211,8 @@ public class FilePersistenceManager {
             } catch (java.nio.file.AtomicMoveNotSupportedException ex) {
                 Files.move(tempPath, targetPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             }
-        } catch (Exception e) {
-            System.err.println("[FilePersistenceManager] Error saving state to " + STORE_PATH + ": " + e.getMessage());
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Error saving state to " + STORE_PATH, e);
         }
     }
 
@@ -436,7 +440,9 @@ public class FilePersistenceManager {
                     try {
                         String tStr = ntfDoc.getString("type");
                         if (tStr != null) type = Notification.Type.valueOf(tStr);
-                    } catch (Exception ignored) {}
+                    } catch (IllegalArgumentException e) {
+                        LOGGER.log(Level.FINE, "Unknown notification type in stored data, defaulting to SYSTEM", e);
+                    }
                     data.notifications.add(new Notification(
                             ntfDoc.getString("id"),
                             ntfDoc.getString("recipientUsername"),
@@ -451,8 +457,8 @@ public class FilePersistenceManager {
             }
 
             return data;
-        } catch (Exception e) {
-            System.err.println("[FilePersistenceManager] Failed to load " + STORE_PATH + ", falling back to seed. Error: " + e.getMessage());
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Failed to load " + STORE_PATH + ", falling back to seed", e);
             return null;
         }
     }
@@ -465,7 +471,9 @@ public class FilePersistenceManager {
         } else if (val instanceof String) {
             try {
                 return Double.parseDouble(((String) val).trim());
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+                LOGGER.log(Level.FINE, "Failed to parse JSON double for key: " + key, ignored);
+            }
         }
         return defaultValue;
     }

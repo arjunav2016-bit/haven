@@ -17,6 +17,8 @@ import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
  * - Quick vacancy updates, editing, deletion, and enquiry management
  */
 public class OwnerDashboardPanel extends JPanel {
+    private static final Logger LOGGER = Logger.getLogger(OwnerDashboardPanel.class.getName());
     private final User currentUser;
     private final HostelDAO dao;
     private final EnquiryDAO enquiryDAO;
@@ -282,8 +285,15 @@ public class OwnerDashboardPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Property updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 refreshTable();
                 if (onDataChanged != null) onDataChanged.run();
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Invalid input: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (NumberFormatException ex) {
+                LOGGER.log(Level.WARNING, "Invalid numeric input in property update: " + ex.getMessage(), ex);
+                JOptionPane.showMessageDialog(this, "Please enter valid numeric values for rent, vacancies, etc.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            } catch (IllegalArgumentException ex) {
+                LOGGER.log(Level.WARNING, "Validation error in property update: " + ex.getMessage(), ex);
+                JOptionPane.showMessageDialog(this, "Validation error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (RuntimeException ex) {
+                LOGGER.log(Level.SEVERE, "Failed to update property: " + ex.getMessage(), ex);
+                JOptionPane.showMessageDialog(this, "Error updating property: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -763,8 +773,15 @@ public class OwnerDashboardPanel extends JPanel {
             if (regPowerCheck != null) regPowerCheck.setSelected(false);
             refreshTable();
             if (onDataChanged != null) onDataChanged.run();
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Validation or DB error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (NumberFormatException ex) {
+            LOGGER.log(Level.WARNING, "Invalid numeric input in property registration: " + ex.getMessage(), ex);
+            JOptionPane.showMessageDialog(this, "Please enter valid numbers for rent, distance, and vacancies.", "Input Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IllegalArgumentException ex) {
+            LOGGER.log(Level.WARNING, "Validation error in property registration: " + ex.getMessage(), ex);
+            JOptionPane.showMessageDialog(this, "Validation error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (RuntimeException ex) {
+            LOGGER.log(Level.SEVERE, "Failed to add property listing: " + ex.getMessage(), ex);
+            JOptionPane.showMessageDialog(this, "Failed to add listing: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

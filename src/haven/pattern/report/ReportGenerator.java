@@ -7,6 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract base class implementing the <b>Template Method Pattern</b> for standardized
@@ -16,6 +18,7 @@ import java.util.Date;
  * Banner Header &rarr; Metadata Section &rarr; Domain Body &rarr; Checklist/Summary Footer.</p>
  */
 public abstract class ReportGenerator {
+    private static final Logger LOGGER = Logger.getLogger(ReportGenerator.class.getName());
     protected static final String SEPARATOR_DOUBLE = "================================================================================\n";
     protected static final String SEPARATOR_SINGLE = "--------------------------------------------------------------------------------\n";
     protected final SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy, HH:mm");
@@ -90,11 +93,13 @@ public abstract class ReportGenerator {
                 if (openChoice == JOptionPane.YES_OPTION && Desktop.isDesktopSupported()) {
                     try {
                         Desktop.getDesktop().open(selectedFile);
-                    } catch (Exception ex) {
+                    } catch (IOException | RuntimeException ex) {
+                        LOGGER.log(Level.WARNING, "Could not open file automatically: " + selectedFile.getAbsolutePath(), ex);
                         JOptionPane.showMessageDialog(parent, "Could not open file automatically: " + ex.getMessage(), "Notice", JOptionPane.INFORMATION_MESSAGE);
                     }
                 }
             } catch (IOException ex) {
+                LOGGER.log(Level.SEVERE, "Error saving report file: " + selectedFile.getAbsolutePath(), ex);
                 JOptionPane.showMessageDialog(parent, "Error saving file: " + ex.getMessage(), "Save Error", JOptionPane.ERROR_MESSAGE);
             }
         }

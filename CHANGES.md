@@ -121,3 +121,61 @@ Streamlines application launch by eliminating unnecessary animation wait times a
 
 **Files:**
 - `src/haven/Main.java` — Removed `SplashScreenWindow` instantiation, unused import, and pacing delays from startup sequence.
+
+---
+
+## Phase 2 — Dead Code & Shims
+
+### 1. Deleted deprecated `haven/pattern/SecurityUtils.java`
+
+**What changed:**
+Removed the backward-compatibility wrapper class `haven.pattern.SecurityUtils` which simply
+forwarded all three methods (`hashPassword`, `verifyPassword`, `isHashed`) to the real
+implementation at `haven.util.SecurityUtils`.
+
+**Why:**
+The wrapper was marked `@Deprecated` and had **zero callers** anywhere in the codebase — no
+import statements, no fully-qualified references. It existed only as a migration shim and was
+never actually needed. Deleting it reduces confusion about which `SecurityUtils` is the real one.
+
+**Files:**
+- `src/haven/pattern/SecurityUtils.java` — **Deleted**
+
+---
+
+### 2. DAO facades (`HostelDAO`, `EnquiryDAO`, `UserDAO`, `ReviewDAO`) — Kept
+
+**Decision:** Keep all four DAO facade classes.
+
+**Why:**
+- They are used by 10+ view classes and `TestEnhancements` — removing them would require a
+  sweeping rewrite of constructor signatures across the entire UI layer.
+- They provide genuine Facade value: `EnquiryDAO.saveEnquiry(6 params)` is simpler than
+  constructing an `Enquiry` object in every caller; `UserDAO.registerUser()` hides the
+  student/owner branching logic.
+- The DAO → Service → Repository layering demonstrates the Facade design pattern for the viva.
+
+---
+
+### 3. Removed misleading `"owner"` default from `PropertyImage`
+
+**What changed:**
+In the `PropertyImage` constructor, the fallback value for `uploadedBy` when null was changed
+from `"owner"` to `"unknown"`.
+
+**Why:**
+The hardcoded `"owner"` string was a leftover magic string. While not an authorization check
+(just a display default), it could be misleading during code review or a viva question about
+the Phase 1 `"owner"` cleanup. Changing it to `"unknown"` makes the intent clear: it's a
+placeholder for missing data, not a role assertion.
+
+**Files:**
+- `src/haven/model/PropertyImage.java` — Changed default `uploadedBy` from `"owner"` to `"unknown"`
+
+---
+
+### 4. Unused imports scan — None found
+
+Ran `javac -Xlint:all` across all source files. **Zero unused import warnings** were reported.
+No cleanup needed.
+

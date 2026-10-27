@@ -21,7 +21,7 @@ public class PropertyImage {
         this.accommodationId = accommodationId;
         this.filePath = filePath;
         this.caption = (caption != null) ? caption : "";
-        this.uploadedBy = (uploadedBy != null) ? uploadedBy : "owner";
+        this.uploadedBy = (uploadedBy != null) ? uploadedBy : "unknown";
         this.uploadedAt = uploadedAt > 0 ? uploadedAt : System.currentTimeMillis();
         this.primary = primary;
     }

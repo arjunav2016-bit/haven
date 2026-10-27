@@ -1,7 +1,7 @@
 package haven;
 
 import haven.model.User;
-import haven.pattern.MongoDBConnection;
+import haven.repository.mongo.MongoDBConnection;
 import haven.repository.RepositoryProvider;
 import haven.view.LoginDialog;
 import haven.view.MainFrame;

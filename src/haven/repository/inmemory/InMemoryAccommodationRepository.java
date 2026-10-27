@@ -1,9 +1,8 @@
 package haven.repository.inmemory;
 
-import haven.db.InMemoryStore;
 import haven.model.Accommodation;
-import haven.pattern.event.AccommodationEvent;
-import haven.pattern.event.HavenEventBus;
+import haven.event.AccommodationEvent;
+import haven.event.HavenEventBus;
 import haven.repository.AccommodationRepository;
 
 import java.util.List;
@@ -77,13 +76,13 @@ public class InMemoryAccommodationRepository implements AccommodationRepository 
 
     @Override
     public List<Accommodation> search(String query, String college, String gender, Double maxRent, List<String> requiredAmenities) {
-        haven.pattern.iterator.AccommodationFilterCriteria criteria = new haven.pattern.iterator.AccommodationFilterCriteria();
+        haven.service.filter.AccommodationFilterCriteria criteria = new haven.service.filter.AccommodationFilterCriteria();
         if (query != null) criteria.setSearchQuery(query);
         if (college != null) criteria.setCollege(college);
         if (gender != null) criteria.setGender(gender);
         if (maxRent != null && maxRent > 0) criteria.setMaxRent(maxRent);
         if (requiredAmenities != null) criteria.setRequiredAmenities(requiredAmenities);
-        return new haven.pattern.iterator.FilteredAccommodationIterator(store.getAllAccommodations(), criteria).toList();
+        return new haven.service.filter.FilteredAccommodationIterator(store.getAllAccommodations(), criteria).toList();
     }
 
     @Override

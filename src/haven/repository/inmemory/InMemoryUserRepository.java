@@ -1,6 +1,5 @@
 package haven.repository.inmemory;
 
-import haven.db.InMemoryStore;
 import haven.exception.AuthenticationException;
 import haven.model.Student;
 import haven.model.User;

@@ -5,7 +5,7 @@ import haven.db.HostelDAO;
 import haven.db.UserDAO;
 import haven.model.Accommodation;
 import haven.model.Enquiry;
-import haven.pattern.builder.HostelBuilder;
+import haven.model.builder.HostelBuilder;
 import haven.repository.AccommodationRepository;
 import haven.repository.EnquiryRepository;
 import haven.repository.RepositoryProvider;

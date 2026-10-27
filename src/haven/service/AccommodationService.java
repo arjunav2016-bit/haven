@@ -1,9 +1,9 @@
 package haven.service;
 
 import haven.model.Accommodation;
-import haven.pattern.decorator.FeaturedAccommodationDecorator;
-import haven.pattern.iterator.AccommodationFilterCriteria;
-import haven.pattern.iterator.FilteredAccommodationIterator;
+import haven.model.decorator.FeaturedAccommodationDecorator;
+import haven.service.filter.AccommodationFilterCriteria;
+import haven.service.filter.FilteredAccommodationIterator;
 import haven.repository.AccommodationRepository;
 import haven.repository.RepositoryProvider;
 import haven.repository.ReviewRepository;

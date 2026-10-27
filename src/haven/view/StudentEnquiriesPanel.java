@@ -5,7 +5,7 @@ import haven.db.HostelDAO;
 import haven.model.Accommodation;
 import haven.model.Enquiry;
 import haven.model.User;
-import haven.pattern.GoogleMapsAdapter;
+import haven.service.map.GoogleMapsAdapter;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  * - Status filtering (All, CONFIRMED, PENDING, CONTACTED, DECLINED, CANCELLED)
  * - Date sorting (Newest First / Oldest First)
  * - Direct access to Enquiry Message Thread (ChatDialog)
- * - Booking slip download via Template Method Pattern (BookingReceiptReport)
+ * - Booking slip download and export
  */
 public class StudentEnquiriesPanel extends JPanel {
     private final User currentUser;
@@ -197,10 +197,10 @@ public class StudentEnquiriesPanel extends JPanel {
 
         Enquiry eq = currentEnquiries.get(selectedRow);
         Accommodation acc = hostelDAO.getAccommodationById(eq.getAccommodationId());
-        String slipContent = haven.pattern.ReceiptGenerator.generateEnquirySlipText(eq, acc, currentUser);
+        String slipContent = haven.report.ReceiptGenerator.generateEnquirySlipText(eq, acc, currentUser);
         String defaultName = "HAVEN_Slip_" + eq.getEnquiryId() + ".txt";
 
-        haven.pattern.ReceiptGenerator.exportToFileWithDialog(this, defaultName, slipContent, "Export Student Booking Slip");
+        haven.report.ReceiptGenerator.exportToFileWithDialog(this, defaultName, slipContent, "Export Student Booking Slip");
     }
 
     public void refreshEnquiries() {

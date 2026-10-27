@@ -6,3 +6,4 @@ bin/
 data/cache/
 *.pptx.bak
 .agents/
+.backup/

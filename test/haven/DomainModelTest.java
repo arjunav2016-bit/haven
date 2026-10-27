@@ -1,14 +1,15 @@
 package haven.test;
 
-import haven.db.HostelDAO;
 import haven.model.*;
-import haven.pattern.NavigationService;
-import haven.pattern.event.ReviewEvent;
-import haven.pattern.iterator.AccommodationFilterCriteria;
-import haven.pattern.iterator.FilteredAccommodationIterator;
+import haven.service.map.NavigationService;
+import haven.event.ReviewEvent;
+import haven.service.filter.AccommodationFilterCriteria;
+import haven.service.filter.FilteredAccommodationIterator;
 import haven.repository.AccommodationRepository;
 import haven.repository.RepositoryProvider;
 import haven.repository.UserRepository;
+import haven.service.AccommodationService;
+import haven.service.ServiceProvider;
 import haven.view.ValidationUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -112,17 +113,19 @@ public class DomainModelTest extends TestBase {
     @Test
     @DisplayName("[TEST 17] Vacancy Decrement Single-Decrement Guarantee")
     public void test17_VacancyDecrementSingleDecrementGuarantee() {
-        HostelDAO testHostelDAO = new HostelDAO(RepositoryProvider.getAccommodationRepository());
-        Accommodation targetAcc = testHostelDAO.getAllAccommodations().get(0);
+        AccommodationRepository accRepo = RepositoryProvider.getAccommodationRepository();
+        AccommodationService accService = ServiceProvider.getAccommodationService();
+        Accommodation targetAcc = accRepo.findAll().get(0);
         int beforeVac = targetAcc.getVacancies();
         if (beforeVac == 0) {
-            testHostelDAO.updateVacancy(targetAcc.getId(), 5);
-            targetAcc = testHostelDAO.getAccommodationById(targetAcc.getId());
+            accService.updateVacancies(targetAcc.getId(), 5);
+            targetAcc = accRepo.findById(targetAcc.getId()).orElse(null);
+            assertNotNull(targetAcc);
             beforeVac = targetAcc.getVacancies();
         }
-        boolean decSuccess = testHostelDAO.decrementVacancy(targetAcc.getId());
+        boolean decSuccess = accService.decrementVacancy(targetAcc.getId());
         assertTrue(decSuccess, "Decrementing vacancy failed");
-        Accommodation updatedAcc = testHostelDAO.getAccommodationById(targetAcc.getId());
+        Accommodation updatedAcc = accRepo.findById(targetAcc.getId()).orElse(null);
         assertNotNull(updatedAcc, "Accommodation not found after decrement");
         int afterVac = updatedAcc.getVacancies();
         assertEquals(beforeVac - 1, afterVac, "Vacancy should decrease by exactly 1");

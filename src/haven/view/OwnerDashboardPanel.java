@@ -499,9 +499,9 @@ public class OwnerDashboardPanel extends JPanel {
                 return;
             }
             String ownerName = (currentUser != null) ? currentUser.getUsername() : "owner";
-            String roster = haven.pattern.ReceiptGenerator.generateOwnerEnquiryRoster(ownerName, currentEnquiries);
+            String roster = haven.report.ReceiptGenerator.generateOwnerEnquiryRoster(ownerName, currentEnquiries);
             String filename = "HAVEN_Roster_" + ownerName + ".txt";
-            haven.pattern.ReceiptGenerator.exportToFileWithDialog(this, filename, roster, "Export Applicants Roster");
+            haven.report.ReceiptGenerator.exportToFileWithDialog(this, filename, roster, "Export Applicants Roster");
         });
         btnPanel.add(exportRosterBtn);
 

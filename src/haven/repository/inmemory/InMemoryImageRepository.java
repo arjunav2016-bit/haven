@@ -1,6 +1,5 @@
 package haven.repository.inmemory;
 
-import haven.db.InMemoryStore;
 import haven.model.PropertyImage;
 import haven.repository.ImageRepository;
 

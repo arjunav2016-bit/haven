@@ -1,6 +1,6 @@
 package haven.repository;
 
-import haven.pattern.MongoDBConnection;
+import haven.repository.mongo.MongoDBConnection;
 import haven.repository.inmemory.InMemoryRepositoryFactory;
 import haven.repository.mongo.MongoRepositoryFactory;
 

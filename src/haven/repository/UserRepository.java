@@ -51,7 +51,7 @@ public interface UserRepository extends Repository<User, String> {
     }
 
     /**
-     * Restores a previously deleted user account (used by Command Pattern undo).
+     * Restores a previously deleted user account (used during administrative undo).
      */
     default void restoreUser(User user, String passwordHash, List<String> wishlist) {
         save(user);

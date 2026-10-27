@@ -3,8 +3,8 @@ package haven.service;
 import haven.model.Accommodation;
 import haven.model.Enquiry;
 import haven.model.Role;
-import haven.pattern.event.EnquiryEvent;
-import haven.pattern.event.HavenEventBus;
+import haven.event.EnquiryEvent;
+import haven.event.HavenEventBus;
 import haven.repository.AccommodationRepository;
 import haven.repository.EnquiryRepository;
 import haven.repository.RepositoryProvider;
@@ -15,8 +15,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Service Layer component for managing student enquiries and room reservation lifecycles.
- * Coordinates EnquiryRepository, State Pattern transitions, and vacancy deductions.
+ * Service component for managing student enquiries and room reservation lifecycles.
+ * Coordinates enquiry persistence, status transitions, and vacancy adjustments.
  */
 public class EnquiryService {
     private final EnquiryRepository enquiryRepository;
@@ -82,7 +82,7 @@ public class EnquiryService {
     }
 
     /**
-     * Updates enquiry status through verified State Pattern transitions.
+     * Updates enquiry status through verified lifecycle state transitions.
      * If transitioning to CANCELLED, vacancy is restored.
      */
     public boolean updateEnquiryStatus(String enquiryId, String newStatus, String ownerResponse) {

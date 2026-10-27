@@ -3,7 +3,7 @@ package haven.view;
 import haven.model.Accommodation;
 import haven.model.PropertyImage;
 import haven.model.User;
-import haven.pattern.PropertyImageStorage;
+import haven.util.PropertyImageStorage;
 import haven.repository.AccommodationRepository;
 import haven.repository.ImageRepository;
 import haven.repository.RepositoryProvider;

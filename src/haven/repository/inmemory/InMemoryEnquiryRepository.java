@@ -1,11 +1,10 @@
 package haven.repository.inmemory;
 
-import haven.db.InMemoryStore;
 import haven.model.Enquiry;
 import haven.model.Notification;
-import haven.pattern.event.EnquiryEvent;
-import haven.pattern.event.HavenEventBus;
-import haven.pattern.event.NotificationEvent;
+import haven.event.EnquiryEvent;
+import haven.event.HavenEventBus;
+import haven.event.NotificationEvent;
 import haven.repository.EnquiryRepository;
 
 import java.util.List;

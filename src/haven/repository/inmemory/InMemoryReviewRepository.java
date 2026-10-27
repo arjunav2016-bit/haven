@@ -1,9 +1,8 @@
 package haven.repository.inmemory;
 
-import haven.db.InMemoryStore;
 import haven.model.Review;
-import haven.pattern.event.HavenEventBus;
-import haven.pattern.event.ReviewEvent;
+import haven.event.HavenEventBus;
+import haven.event.ReviewEvent;
 import haven.repository.ReviewRepository;
 
 import java.util.List;

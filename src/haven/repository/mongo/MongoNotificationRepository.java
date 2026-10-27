@@ -6,9 +6,9 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.Updates;
 import haven.model.Notification;
-import haven.pattern.MongoDBConnection;
-import haven.pattern.event.HavenEventBus;
-import haven.pattern.event.NotificationEvent;
+import haven.repository.mongo.MongoDBConnection;
+import haven.event.HavenEventBus;
+import haven.event.NotificationEvent;
 import haven.repository.NotificationRepository;
 import org.bson.Document;
 

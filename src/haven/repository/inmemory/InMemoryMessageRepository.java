@@ -1,11 +1,10 @@
 package haven.repository.inmemory;
 
-import haven.db.InMemoryStore;
 import haven.model.ChatMessage;
 import haven.model.Notification;
-import haven.pattern.event.ChatEvent;
-import haven.pattern.event.HavenEventBus;
-import haven.pattern.event.NotificationEvent;
+import haven.event.ChatEvent;
+import haven.event.HavenEventBus;
+import haven.event.NotificationEvent;
 import haven.repository.MessageRepository;
 
 import java.util.List;

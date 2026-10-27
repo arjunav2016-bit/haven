@@ -6,8 +6,8 @@ import haven.db.ReviewDAO;
 import haven.db.UserDAO;
 import haven.model.Accommodation;
 import haven.model.User;
-import haven.pattern.event.*;
-import haven.pattern.mediator.PanelMediator;
+import haven.event.*;
+import haven.view.PanelMediator;
 import haven.repository.*;
 
 import javax.swing.*;
@@ -131,7 +131,7 @@ public class MainFrame extends JFrame implements PanelMediator {
 
 
 
-        // Observer Pattern: Register EventBus Subscribers for Reactive UI Sync
+        // Register EventBus listeners for reactive UI sync
         accommodationEventListener = event -> SwingUtilities.invokeLater(() -> {
             applyFilters();
             if (mapPanel != null) mapPanel.refreshMapData();

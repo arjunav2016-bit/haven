@@ -4,7 +4,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 import haven.model.PropertyImage;
-import haven.pattern.MongoDBConnection;
+import haven.repository.mongo.MongoDBConnection;
 import haven.repository.ImageRepository;
 import org.bson.Document;
 

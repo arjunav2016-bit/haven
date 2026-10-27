@@ -1,14 +1,14 @@
 package haven.view;
 
-import haven.db.InMemoryStore;
+import haven.repository.inmemory.InMemoryStore;
 import haven.model.Accommodation;
 import haven.model.Enquiry;
 import haven.model.Hostel;
 import haven.model.Review;
 import haven.model.User;
-import haven.pattern.ReceiptGenerator;
-import haven.pattern.command.*;
-import haven.pattern.report.SystemAnalyticsReport;
+import haven.report.ReceiptGenerator;
+import haven.service.action.*;
+import haven.report.SystemAnalyticsReport;
 import haven.repository.*;
 import haven.repository.inmemory.FilePersistenceManager;
 
@@ -23,13 +23,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * AdminDashboardPanel - Enterprise Platform Governance & Moderation Portal (ADMIN Role).
+ * AdminDashboardPanel - Administrative and moderation portal for platform management.
  * Features:
- * - Command Pattern Undo / Redo Toolbar for reversible administrative actions
+ * - Toolbar with Undo / Redo for administrative actions
  * - Tab 1: User Account Governance (Activate / Deactivate / Delete / Register)
  * - Tab 2: Property Moderation (Approve / Flag / Reject / Toggle Featured Badge / Photo Audit)
- * - Tab 3: Student Review Moderation (Delete / Flag Reviews with Command Undo)
- * - Tab 4: System-Wide Analytics & Custom Java2D Charts + Template Method Report Export
+ * - Tab 3: Student Review Moderation (Delete / Flag Reviews)
+ * - Tab 4: System-Wide Analytics & Charts + Report Export
  * - Tab 5: Persistence Engine & Seed Data Management
  */
 public class AdminDashboardPanel extends JPanel {
@@ -512,11 +512,11 @@ public class AdminDashboardPanel extends JPanel {
             barY += 36;
         }
 
-        // Right Chart: Enquiries by Lifecycle State (State Pattern)
+        // Right Chart: Enquiries by Lifecycle State
         int rightX = 40 + chartW;
         g2.setColor(HavenTheme.TEXT_PRIMARY);
         g2.setFont(HavenTheme.FONT_SUBTITLE);
-        g2.drawString("Enquiries by Lifecycle State (State Pattern)", rightX, chartY);
+        g2.drawString("Enquiries by Lifecycle State", rightX, chartY);
 
         String[] states = {"PENDING", "CONTACTED", "CONFIRMED", "DECLINED", "CANCELLED"};
         Color[] stateColors = {HavenTheme.WARNING, HavenTheme.INFO, HavenTheme.SUCCESS, HavenTheme.DANGER, HavenTheme.TEXT_MUTED};

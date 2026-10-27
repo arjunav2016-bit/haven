@@ -2,11 +2,11 @@ package haven.view;
 
 import haven.db.UserDAO;
 import haven.model.User;
-import haven.pattern.event.ChatEvent;
-import haven.pattern.event.HavenEventBus;
-import haven.pattern.event.HavenEventListener;
-import haven.pattern.event.NotificationEvent;
-import haven.pattern.mediator.PanelMediator;
+import haven.event.ChatEvent;
+import haven.event.HavenEventBus;
+import haven.event.HavenEventListener;
+import haven.event.NotificationEvent;
+import haven.view.PanelMediator;
 import haven.repository.NotificationRepository;
 import haven.repository.RepositoryProvider;
 

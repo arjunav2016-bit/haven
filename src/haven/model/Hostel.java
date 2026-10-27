@@ -1,6 +1,6 @@
 package haven.model;
 
-import haven.pattern.builder.HostelBuilder;
+import haven.model.builder.HostelBuilder;
 
 /**
  * Concrete Accommodation subclass representing a college-approved Hostel.

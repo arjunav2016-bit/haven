@@ -4,9 +4,9 @@ import haven.model.Accommodation;
 import haven.model.ChatMessage;
 import haven.model.Enquiry;
 import haven.model.User;
-import haven.pattern.event.ChatEvent;
-import haven.pattern.event.HavenEventBus;
-import haven.pattern.event.HavenEventListener;
+import haven.event.ChatEvent;
+import haven.event.HavenEventBus;
+import haven.event.HavenEventListener;
 import haven.repository.MessageRepository;
 import haven.repository.RepositoryProvider;
 

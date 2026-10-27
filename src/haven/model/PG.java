@@ -1,6 +1,6 @@
 package haven.model;
 
-import haven.pattern.builder.PGBuilder;
+import haven.model.builder.PGBuilder;
 
 /**
  * Concrete Accommodation subclass representing a Paying Guest (PG) facility.

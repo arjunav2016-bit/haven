@@ -7,9 +7,9 @@ import com.mongodb.client.model.Updates;
 import haven.model.Accommodation;
 import haven.model.Hostel;
 import haven.model.PG;
-import haven.pattern.MongoDBConnection;
-import haven.pattern.event.AccommodationEvent;
-import haven.pattern.event.HavenEventBus;
+import haven.repository.mongo.MongoDBConnection;
+import haven.event.AccommodationEvent;
+import haven.event.HavenEventBus;
 import haven.repository.AccommodationRepository;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -30,7 +30,7 @@ public class MongoAccommodationRepository implements AccommodationRepository {
     public MongoAccommodationRepository() {
         this.collection = MongoDBConnection.getInstance().getDatabase().getCollection("hostels");
         if (this.collection.countDocuments() == 0) {
-            for (Accommodation acc : haven.db.SeedData.getSCTCEApprovedHostels()) {
+            for (Accommodation acc : haven.repository.inmemory.SeedData.getSCTCEApprovedHostels()) {
                 save(acc);
             }
         } else {
@@ -45,7 +45,7 @@ public class MongoAccommodationRepository implements AccommodationRepository {
      * This fixes the map pin rendering for databases seeded before coordinates were introduced.
      */
     private void migrateCoordinatesFromSeedData() {
-        for (Accommodation seed : haven.db.SeedData.getSCTCEApprovedHostels()) {
+        for (Accommodation seed : haven.repository.inmemory.SeedData.getSCTCEApprovedHostels()) {
             if (seed.getLatitude() != 0.0 || seed.getLongitude() != 0.0) {
                 collection.updateOne(
                         Filters.and(
@@ -166,10 +166,10 @@ public class MongoAccommodationRepository implements AccommodationRepository {
                 ? filter(college, gender, (maxRent != null) ? maxRent : 0)
                 : findAll();
 
-        haven.pattern.iterator.AccommodationFilterCriteria criteria = new haven.pattern.iterator.AccommodationFilterCriteria();
+        haven.service.filter.AccommodationFilterCriteria criteria = new haven.service.filter.AccommodationFilterCriteria();
         if (query != null) criteria.setSearchQuery(query);
         if (requiredAmenities != null) criteria.setRequiredAmenities(requiredAmenities);
-        return new haven.pattern.iterator.FilteredAccommodationIterator(all, criteria).toList();
+        return new haven.service.filter.FilteredAccommodationIterator(all, criteria).toList();
     }
 
     @Override
@@ -233,7 +233,7 @@ public class MongoAccommodationRepository implements AccommodationRepository {
     }
 
     private Document mapModelToDocument(Accommodation acc) {
-        haven.pattern.PropertyImageStorage.ensureDefaultImagesForAccommodation(acc);
+        haven.util.PropertyImageStorage.ensureDefaultImagesForAccommodation(acc);
         Document doc = new Document("id", acc.getId())
                 .append("ownerId", acc.getOwnerId())
                 .append("name", acc.getName())
@@ -340,7 +340,7 @@ public class MongoAccommodationRepository implements AccommodationRepository {
         if (imagePaths != null && !imagePaths.isEmpty()) {
             for (String img : imagePaths) acc.addImagePath(img);
         }
-        haven.pattern.PropertyImageStorage.ensureDefaultImagesForAccommodation(acc);
+        haven.util.PropertyImageStorage.ensureDefaultImagesForAccommodation(acc);
 
         String modStatus = doc.getString("moderationStatus");
         if (modStatus != null && !modStatus.isEmpty()) {

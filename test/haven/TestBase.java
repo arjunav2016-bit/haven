@@ -1,8 +1,8 @@
 package haven.test;
 
-import haven.db.InMemoryStore;
-import haven.pattern.MongoDBConnection;
-import haven.pattern.event.HavenEventBus;
+import haven.repository.inmemory.InMemoryStore;
+import haven.repository.mongo.MongoDBConnection;
+import haven.event.HavenEventBus;
 import haven.repository.RepositoryProvider;
 import haven.repository.inmemory.FilePersistenceManager;
 import org.junit.jupiter.api.AfterEach;

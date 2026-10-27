@@ -1,7 +1,7 @@
 package haven.repository.inmemory;
 
 import haven.model.*;
-import haven.pattern.PropertyImageStorage;
+import haven.util.PropertyImageStorage;
 import org.bson.Document;
 
 import java.io.File;

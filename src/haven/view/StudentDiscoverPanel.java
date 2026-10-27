@@ -7,8 +7,8 @@ import haven.db.UserDAO;
 import haven.model.Accommodation;
 import haven.model.Student;
 import haven.model.User;
-import haven.pattern.iterator.AccommodationFilterCriteria;
-import haven.pattern.mediator.PanelMediator;
+import haven.service.filter.AccommodationFilterCriteria;
+import haven.view.PanelMediator;
 import haven.service.AccommodationService;
 import haven.service.AuthService;
 import haven.service.EnquiryService;
@@ -118,7 +118,7 @@ public class StudentDiscoverPanel extends JPanel {
                     g2.setFont(HavenTheme.FONT_BODY);
                     Insets insets = getInsets();
                     FontMetrics fm = g2.getFontMetrics();
-                    g2.drawString("🔍 Search stays, area...", insets.left + 2, (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
+                    g2.drawString("Search stays, area...", insets.left + 2, (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
                     g2.dispose();
                 }
             }

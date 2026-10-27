@@ -8,7 +8,7 @@ import haven.model.Admin;
 import haven.model.Owner;
 import haven.model.Student;
 import haven.model.User;
-import haven.pattern.MongoDBConnection;
+import haven.repository.mongo.MongoDBConnection;
 import haven.util.SecurityUtils;
 import haven.repository.UserRepository;
 import org.bson.Document;

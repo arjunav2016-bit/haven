@@ -8,7 +8,7 @@ import haven.model.Accommodation;
 import haven.model.Hostel;
 import haven.model.PG;
 import haven.model.User;
-import haven.pattern.GoogleMapsAdapter;
+import haven.service.map.GoogleMapsAdapter;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;

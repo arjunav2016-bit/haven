@@ -1,13 +1,12 @@
 package haven.test;
 
-import haven.db.InMemoryStore;
-import haven.db.UserDAO;
+import haven.repository.inmemory.InMemoryStore;
 import haven.model.*;
-import haven.pattern.PropertyImageStorage;
-import haven.pattern.event.ChatEvent;
-import haven.pattern.event.HavenEventBus;
-import haven.pattern.event.HavenEventListener;
-import haven.pattern.event.NotificationEvent;
+import haven.util.PropertyImageStorage;
+import haven.event.ChatEvent;
+import haven.event.HavenEventBus;
+import haven.event.HavenEventListener;
+import haven.event.NotificationEvent;
 import haven.repository.*;
 import haven.repository.inmemory.FilePersistenceManager;
 import haven.repository.inmemory.InMemoryRepositoryFactory;
@@ -72,8 +71,8 @@ public class RepositoryAndPersistenceTest extends TestBase {
     }
 
     @Test
-    @DisplayName("[TEST 8] Generic Repository Pattern & Domain Contracts")
-    public void test08_GenericRepositoryPatternAndDomainContracts() {
+    @DisplayName("[TEST 8] Generic Repository Interface & Domain Contracts")
+    public void test08_GenericRepositoryAndDomainContracts() {
         AccommodationRepository accRepo = RepositoryProvider.getAccommodationRepository();
         UserRepository userRepo = RepositoryProvider.getUserRepository();
         EnquiryRepository enquiryRepo = RepositoryProvider.getEnquiryRepository();
@@ -87,8 +86,8 @@ public class RepositoryAndPersistenceTest extends TestBase {
     }
 
     @Test
-    @DisplayName("[TEST 9] Abstract Factory Pattern (RepositoryFactory)")
-    public void test09_AbstractFactoryPatternRepositoryFactory() {
+    @DisplayName("[TEST 9] Repository Factory Engine Provisioning (RepositoryFactory)")
+    public void test09_RepositoryFactoryEngineProvisioning() {
         RepositoryFactory currentFactory = RepositoryProvider.getFactory();
         assertNotNull(currentFactory, "RepositoryFactory is null");
         assertNotNull(currentFactory.getAccommodationRepository(), "Factory failed to supply AccommodationRepository");
@@ -121,8 +120,17 @@ public class RepositoryAndPersistenceTest extends TestBase {
     @DisplayName("[TEST 18] User Profile Multi-Subclass Persistence (Student & Owner)")
     public void test18_UserProfileMultiSubclassPersistence() {
         UserRepository userRepo = RepositoryProvider.getUserRepository();
-        UserDAO testUserDAO = new UserDAO();
-        testUserDAO.updateProfile("student", "Updated Student Name", "9112233445", "SCTCE", "Boys", 9500.0);
+        haven.service.AuthService authService = ServiceProvider.getAuthService();
+        User student = userRepo.findById("student").orElse(null);
+        assertNotNull(student, "Student user not found in repository");
+        student.setFullName("Updated Student Name");
+        student.setPhone("9112233445");
+        if (student instanceof Student) {
+            ((Student) student).setCollegeName("SCTCE");
+            ((Student) student).setGenderPreference("Boys");
+            ((Student) student).setMaxBudget(9500.0);
+        }
+        authService.updateProfile(student);
         User fetchedStudent = userRepo.findById("student").orElse(null);
         assertNotNull(fetchedStudent, "Student user not found in repository");
         assertEquals("Updated Student Name", fetchedStudent.getFullName(), "Student fullName update failed in repository");

@@ -7,9 +7,9 @@ import haven.model.Accommodation;
 import haven.model.Hostel;
 import haven.model.PG;
 import haven.model.User;
-import haven.pattern.GoogleMapsAdapter;
-import haven.pattern.PropertyImageStorage;
-import haven.pattern.decorator.FeaturedAccommodationDecorator;
+import haven.service.map.GoogleMapsAdapter;
+import haven.util.PropertyImageStorage;
+import haven.model.decorator.FeaturedAccommodationDecorator;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -27,7 +27,7 @@ import java.util.logging.Logger;
  * ListingCardPanel - Modern Three-Column Card Component for Accommodations.
  * Features:
  * - Left Property Photo Thumbnail (clickable to launch ImageGalleryDialog carousel)
- * - Center details column with Decorator Pattern Featured badge, verified ratings, metrics, and amenities
+ * - Center details column with featured badge, verified ratings, metrics, and amenities
  * - Right pricing callout and action column (Enquire & Book, Direct Chat, Map, Wishlist)
  */
 public class ListingCardPanel extends JPanel {

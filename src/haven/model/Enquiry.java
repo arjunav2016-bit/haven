@@ -1,13 +1,13 @@
 package haven.model;
 
-import haven.pattern.state.EnquiryState;
-import haven.pattern.state.EnquiryStateFactory;
+import haven.model.state.EnquiryState;
+import haven.model.state.EnquiryStateFactory;
 
 import java.util.Date;
 
 /**
- * Domain model representing a student accommodation enquiry / booking request.
- * Integrates the State Pattern via {@link EnquiryState} to enforce valid lifecycle transitions.
+ * Domain model representing a student accommodation enquiry or booking request.
+ * Enforces valid lifecycle status transitions.
  */
 public class Enquiry {
     private final String enquiryId;
@@ -51,7 +51,7 @@ public class Enquiry {
     }
 
     /**
-     * Transitions this enquiry to the target status using the State Pattern.
+     * Transitions this enquiry to the target status if allowed.
      *
      * @param targetStatus target status name
      * @throws IllegalStateException if the transition is invalid from the current state
